@@ -1,14 +1,15 @@
-import * as v8 from 'v8';
-
-import * as Koa from 'koa';
+// import * as v8 from 'v8';
+// import * as Koa from 'koa';
+const v8 = require('v8')
+const Koa = require('koa')
 
 const status = {
-  index: async (ctx : Koa.Context, next : () => Promise<any>) => {
+  index: async (ctx, next) => {
     await next();
     ctx.response.body = 'OK';
   },
 
-  memory: async (ctx : Koa.Context, next : () => Promise<any>) => {
+  memory: async(ctx, next) => {
     await next();
 
     ctx.response.body = {
@@ -17,7 +18,7 @@ const status = {
     };
   },
 
-  pool: async (ctx : Koa.Context, next : () => Promise<any>) => {
+  pool: async(ctx, next) => {
     await next();
 
     ctx.response.body = {
@@ -26,4 +27,4 @@ const status = {
   },
 };
 
-export default status;
+module.exports = status;
