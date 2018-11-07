@@ -8,10 +8,10 @@ interface PlayerStats {
 
 // Sequelize service object.
 export interface Profile {
-  account_id : string,
-  summoner_id : string,
-  summoner_name : string,
-  stats : PlayerStats,
+account_id: string,
+  summoner_id: string,
+  summoner_name: string,
+  stats: PlayerStats,
 }
 
 // Sequelize service object.
@@ -37,13 +37,12 @@ export const ProfileModel = sequelize.define<ProfileInstance, Profile>(
 });
 
 // Create or update a profile in the database cache.
-export async function writeProfile(profile : Profile) {
+export async function writeProfile(profile: Profile) {
   await ProfileModel.upsert(profile);
 }
 
 // Fetch a profile from the database cache.
-export async function readProfile(accountId : string)
-    : Promise<Profile | null> {
+export async function readProfile(accountId: string): Promise<Profile | null> {
   const profile = await ProfileModel.findById(accountId);
   if (profile === null) {
     return null;
@@ -57,8 +56,7 @@ export async function readProfile(accountId : string)
 //
 // If the cache does not contain all the requested data, returns the subset of
 // the requested profiles that do exist.
-export async function readProfiles(accountIds : string[])
-    : Promise<Profile[]> {
+export async function readProfiles(accountIds: string[]): Promise<Profile[]> {
   const profiles = await ProfileModel.findAll({ where: {
     account_id: { [Sequelize.Op.in]: accountIds },
   }});
@@ -76,8 +74,8 @@ export async function readProfiles(accountIds : string[])
 // completed.
 //
 // Each call might return fewer than pageSize results due to internal filtering.
-export async function readProfilesPaged(pageStart : string, pageSize : number)
-    : Promise<{ data: Profile[], nextPageStart: string | null }> {
+export async function readProfilesPaged(pageStart: string, pageSize: number):
+    Promise<{ data: Profile[], nextPageStart: string | null }> {
   const profiles = await ProfileModel.findAll({
     where: { account_id: { [Sequelize.Op.gt]: pageStart } },
     order: [ 'id' ], limit: pageSize,
