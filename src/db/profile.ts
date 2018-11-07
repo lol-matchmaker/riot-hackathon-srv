@@ -2,84 +2,66 @@ import * as Sequelize from 'sequelize';
 
 import { sequelize } from './connection';
 
-// Updated every time the parser changes in a released version.
-export const profileParserVersion = "1";
+interface PlayerStats {
 
-// The result of scraping a hotslogs player profile page.
-export interface PlayerProfile {
-  playerRegion? : string, playerName? : string, playerId? : string,
-  mmr: {
-    heroLeague? : number,
-    quickMatch? : number,
-    teamLeague? : number,
-    unrankedDraft? : number,
-  },
-  winRate? : number, mvpRate? : number, heroLevel? : number,
-  gamesPlayed? : number, timePlayed? : number,
-};
-
-// Sequelize service object.
-export interface ProfileData {
-  id : string,
-  name : string,
-  region : string,
-  data : PlayerProfile,
-  data_version : string,
 }
 
 // Sequelize service object.
-interface ProfileInstance extends Sequelize.Instance<ProfileData>, ProfileData {
+export interface Profile {
+account_id: string,
+  summoner_id: string,
+  summoner_name: string,
+  stats: PlayerStats,
+}
+
+// Sequelize service object.
+interface ProfileInstance extends Sequelize.Instance<Profile>, Profile {
 }
 
 // Sequelize model for PlayerProfile.
-export const ProfileModel = sequelize.define<ProfileInstance, ProfileData>(
+export const ProfileModel = sequelize.define<ProfileInstance, Profile>(
     'profile', {
-  id: {
+  account_id: {
     type: Sequelize.STRING,
     primaryKey: true,
   },
-  name: Sequelize.STRING,
-  region: Sequelize.STRING,
-  data: Sequelize.JSON,
-  data_version: Sequelize.STRING,
+  summoner_id: {
+    type: Sequelize.STRING,
+    primaryKey: true,
+  },
+  summoner_name: Sequelize.STRING,
+  stats: Sequelize.JSON,
 }, {
   createdAt: false,
   updatedAt: 'updated_at',
 });
 
 // Create or update a profile in the database cache.
-export async function writeProfile(profile : PlayerProfile) {
-  await ProfileModel.upsert({
-    id: profile.playerId,
-    name: profile.playerName,
-    region: profile.playerRegion,
-
-    data: profile,
-    data_version: profileParserVersion,
-  });
+export async function writeProfile(profile: Profile) {
+  await ProfileModel.upsert(profile);
 }
 
 // Fetch a profile from the database cache.
-export async function readProfile(playerId : string)
-    : Promise<PlayerProfile | null> {
-  const record = await ProfileModel.findById(playerId);
-  if (record === null || record.data_version !== profileParserVersion)
+export async function readProfile(accountId: string): Promise<Profile | null> {
+  const profile = await ProfileModel.findById(accountId);
+  if (profile === null) {
     return null;
+  }
 
-  return record.data;
+  // TODO(pwnall): Probably fetch more things here.
+  return profile;
 }
 
 // Fetch a bunch of profiles from the database cache.
 //
 // If the cache does not contain all the requested data, returns the subset of
 // the requested profiles that do exist.
-export async function readProfiles(playerIds : string[])
-    : Promise<PlayerProfile[]> {
-  const records = await ProfileModel.findAll({ where: {
-    id: { [Sequelize.Op.in]: playerIds },
+export async function readProfiles(accountIds: string[]): Promise<Profile[]> {
+  const profiles = await ProfileModel.findAll({ where: {
+    account_id: { [Sequelize.Op.in]: accountIds },
   }});
 
-  return records;
+  return profiles;
 //      filter((record) => record.data_version === profileParserVersion).
 //      map((record) => record.data);
 }
@@ -92,18 +74,18 @@ export async function readProfiles(playerIds : string[])
 // completed.
 //
 // Each call might return fewer than pageSize results due to internal filtering.
-export async function readProfilesPaged(pageStart : string, pageSize : number)
-    : Promise<{ data: PlayerProfile[], nextPageStart: string | null }> {
-  const records = await ProfileModel.findAll({
-    where: { id: { [Sequelize.Op.gt]: pageStart } },
+export async function readProfilesPaged(pageStart: string, pageSize: number):
+    Promise<{ data: Profile[], nextPageStart: string | null }> {
+  const profiles = await ProfileModel.findAll({
+    where: { account_id: { [Sequelize.Op.gt]: pageStart } },
     order: [ 'id' ], limit: pageSize,
   });
 
-  const resultSize = records.length;
+  const resultSize = profiles.length;
   const nextPageStart = (resultSize < pageSize) ?
-      null : records[resultSize - 1].id;
+      null : profiles[resultSize - 1].account_id;
 
-  const data = records;
+  const data = profiles;
 //      filter((record) => record.data_version === profileParserVersion).
 //      map((record) => record.data);
 

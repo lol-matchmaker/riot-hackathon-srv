@@ -10,10 +10,11 @@
     "koa-router": ">= 7.3.0",
     "moment": ">= 2.20.1",
     "node-fetch": ">= 1.7.3",
-    "pg": "^6.4.2",
-    "pg-native": "^2.2.0",
-    "puppeteer": ">= 0.13.0",
-    "sequelize": ">= 4.28.6",
+    "pg": ">= 7.6.1",
+    "pg-native": ">= 3.0.0",
+    "request": ">= 2.88.0",
+    "request-promise-native": ">= 1.0.5",
+    "sequelize": ">= 4.41.0",
     "source-map-support": ">=0"
   },
   "devDependencies": {
@@ -35,7 +36,9 @@
     "@types/mocha": ">= 2.2.45",
     "@types/node": ">=8.5.2",
     "@types/node-fetch": ">= 1.6.7",
-    "@types/sequelize": ">= 4.0.80",
+    "@types/request": "^2.48.1",
+    "@types/request-promise-native": "^1.0.15",
+    "@types/sequelize": ">= 4.27.30",
     "@types/text-encoding": ">= 0.0.32"
   },
   "scripts": {
