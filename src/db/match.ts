@@ -7,7 +7,7 @@ interface MatchStats {
 }
 
 // Sequelize service object.
-interface Match {
+export interface Match {
   id: string,
   map: string,
   stats: MatchStats,

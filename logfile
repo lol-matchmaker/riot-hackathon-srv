@@ -1,0 +1,12 @@
+2018-11-07 15:08:10.730 PST [98014] LOG:  listening on IPv6 address "::1", port 5432
+2018-11-07 15:08:10.730 PST [98014] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2018-11-07 15:08:10.731 PST [98014] LOG:  listening on Unix socket "/tmp/.s.PGSQL.5432"
+2018-11-07 15:08:10.762 PST [98015] LOG:  database system was shut down at 2018-11-07 15:02:33 PST
+2018-11-07 15:08:10.770 PST [98014] LOG:  database system is ready to accept connections
+2018-11-07 15:08:13.279 PST [98026] ERROR:  role "postgres" does not exist
+2018-11-07 15:08:13.279 PST [98026] STATEMENT:  CREATE DATABASE riot_hackathon OWNER postgres;
+2018-11-07 15:12:55.160 PST [98386] ERROR:  operator does not exist: character varying = integer at character 182
+2018-11-07 15:12:55.160 PST [98386] HINT:  No operator matches the given name and argument type(s). You might need to add explicit type casts.
+2018-11-07 15:12:55.160 PST [98386] QUERY:  UPDATE "profiles" SET "account_id"=216296325,"summoner_id"=53570313,"summoner_name"='oxstormthunder',"stats"='{}',"updated_at"='2018-11-07 23:12:55.129 +00:00' WHERE (("account_id" = 216296325 AND "summoner_id" = 53570313))
+2018-11-07 15:12:55.160 PST [98386] CONTEXT:  PL/pgSQL function pg_temp_4.sequelize_upsert() line 1 at SQL statement
+2018-11-07 15:12:55.160 PST [98386] STATEMENT:  CREATE OR REPLACE FUNCTION pg_temp.sequelize_upsert(OUT created boolean, OUT primary_key text)  AS $func$ BEGIN INSERT INTO "profiles" ("account_id","summoner_id","summoner_name","stats","updated_at") VALUES (216296325,53570313,'oxstormthunder','{}','2018-11-07 23:12:55.129 +00:00'); created := true; EXCEPTION WHEN unique_violation THEN UPDATE "profiles" SET "account_id"=216296325,"summoner_id"=53570313,"summoner_name"='oxstormthunder',"stats"='{}',"updated_at"='2018-11-07 23:12:55.129 +00:00' WHERE (("account_id" = 216296325 AND "summoner_id" = 53570313)); created := false; END; $func$ LANGUAGE plpgsql; SELECT * FROM pg_temp.sequelize_upsert();

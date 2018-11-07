@@ -3,7 +3,7 @@ import * as koaCors from '@koa/cors';
 import * as koaJson from 'koa-json';
 import * as KoaRouter from 'koa-router';
 
-import match from './match';
+// import match from './match';
 import profile from './profile';
 import status from './status';
 
@@ -15,7 +15,7 @@ router.get('/status', status.index);
 
 router.get('/profile/new', profile.new); // GET /profile/new?summoner_name=...
 
-router.get('/match', match.id)
+// router.get('/match', match.id)
 
 export const app = new Koa();
 
