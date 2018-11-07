@@ -8,7 +8,7 @@ interface PlayerStats {
 
 // Sequelize service object.
 export interface Profile {
-account_id: string,
+  account_id: string,
   summoner_id: string,
   summoner_name: string,
   stats: PlayerStats,
