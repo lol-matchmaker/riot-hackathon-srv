@@ -3,6 +3,7 @@
 const v8 = require('v8')
 const Koa = require('koa')
 var request = require('request-promise-native');
+const profile = require('../db/profile')
 
 const secret = require('./secret')
 
@@ -26,8 +27,16 @@ const profile = {
     
     console.log(htmlString)
 
+    profile.writeProfile({
+      account_id: htmlString.accountId,
+      summoner_id: htmlString.id,
+      summoner_name: ctx.query.summoner_name
+    })
+
     ctx.response.body = {
-      ohai: htmlString
+      account_id: htmlString.accountId,
+      summoner_id: htmlString.id,
+      summoner_name: ctx.query.summoner_name
     };
   },
 };
