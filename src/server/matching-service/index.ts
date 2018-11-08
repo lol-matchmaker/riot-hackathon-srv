@@ -38,13 +38,15 @@ function calculateScore(players:any) {
             }
 
             // compare score for rank difference
-            var rankDiff:any = players[i]["rank"] + players[t]["rank"];
+            var rankDiff:any = Math.abs(players[i]["rank"] - players[t]["rank"]);
             // if rank is more than 13 diff just set to 13+
             if(rankDiff >= 13) {
                 rankDiff = "13+";
             }
 
             curScore += rules["rules"]["rankDiffPenalty"][rankDiff];
+
+            // Compare scores for 
         }
     }
 }
