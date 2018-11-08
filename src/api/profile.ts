@@ -4,7 +4,6 @@ import request = require('request-promise-native');
 import { writeProfile, Profile } from '../db/profile';
 import { writeMatch, Match } from '../db/match';
 import { MatchProfile, writeMatchProfile } from '../db/match_profile';
-// import { writeMatch } from '../db/match';
 
 const secret: { api_key: string } = require('./secret.js');
 
@@ -23,8 +22,6 @@ async function fetchProfileByName(name: string): Promise<Profile> {
     json: true,
     url: `${base}/lol/summoner/v3/summoners/by-name/${name}`,
   });
-  // console.log(jsonObject);
-  // console.log(jsonObject.accountId);
 
   const profile: Profile = {
     account_id: jsonObject.accountId.toString(),  // Riot reports integers.
@@ -35,149 +32,135 @@ async function fetchProfileByName(name: string): Promise<Profile> {
   return profile;
 }
 
+async function fetchAccountMatchList(accountId: string): Promise<string[]> {
+  const jsonObject = await request({
+    headers: request_header,
+    json: true,
+    url: base + '/lol/match/v3/matchlists/by-account/' + accountId,
+  });
+
+  return jsonObject.matches.map((match: any) => match.gameId as string);
+}
+
+function teamNameFromRiotId(riotTeamId: number): 'red' | 'blue' {
+  switch (riotTeamId) {
+    case 100:
+      return 'blue';
+    case 200:
+      return 'red';
+    default:
+      throw new Error('Unknown team id');
+  }
+}
+
+interface FullMatchInfo {
+  match: Match,
+  profiles: MatchProfile[],
+}
+
+function matchFromRiotMatchJson(match_jsonObject: any): Match {
+  // Match -- game-wide data
+  const match: Match = {
+    id: match_jsonObject.gameId.toString(),
+    map: match_jsonObject.gameMode,
+    stats: {
+      teams: {
+        blue: {},
+        red: {},
+      },
+    },
+  };
+
+  for (const teamJson of match_jsonObject.teams) {
+    const teamName = teamNameFromRiotId(teamJson.teamId);
+    const teamStats = match.stats.teams[teamName];
+
+    teamStats.towerKills = teamJson.towerKills;
+    teamStats.inhibitorKills = teamJson.inhibitorKills;
+    teamStats.baronKills = teamJson.baronKills;
+    teamStats.dragonKills = teamJson.dragonKills;
+  }
+
+  return match;
+}
+
+async function fetchMatchById(matchId: string): Promise<FullMatchInfo> {
+  const match_jsonObject = await request({
+    headers: request_header,
+    json: true,
+    url: base + '/lol/match/v3/matches/' + matchId
+  });
+
+  const match = matchFromRiotMatchJson(match_jsonObject);
+
+  const participantsById = new Map<number, any>();
+  for (let participant of match_jsonObject.participantIdentities) {
+    participantsById.set(participant.participantId, participant.player);
+  }
+
+  const matchProfiles: MatchProfile[] = [];
+  for (let participant of match_jsonObject.participants) {
+    const participantId = participant.participantId;
+    const playerInfo = participantsById.get(participantId);
+    if (playerInfo === undefined) {
+      continue;
+    }
+
+    const teamName = teamNameFromRiotId(participant.teamId);
+
+    const matchProfile: MatchProfile = {
+      account_id: playerInfo.currentAccountId.toString(),
+      match_id: match.id,
+      played_at: new Date(),  // TODO: new Date(match_jsonObject.timeCreated),
+      data: {
+        champion_played: participant.championId, // number
+        gold_earned: participant.stats.goldEarned,
+        turrets_killed: participant.stats.turretsKilled,
+        inhibitorKills: participant.stats.inhibitorKills,
+        cs_score: participant.stats.totalMinionsKilled,
+        vision_score: participant.stats.visionScore,
+        team_name: teamName,
+        team_stats: match.stats.teams[teamName],
+      },
+    };
+    matchProfiles.push(matchProfile);
+  }
+
+  return {
+    match: match,
+    profiles: matchProfiles,
+  };
+}
+
 const profile = {
   new: async (ctx : Koa.Context, next : () => Promise<any>) => {
     await next();
 
     const name = ctx.query.summoner_name;
-    console.log(name);
 
     const profile = await fetchProfileByName(name);
-    console.log(profile);
 
     // create each summoner's profile
+    console.log(profile);
     await writeProfile(profile);
+    console.log('Done writing profile');
 
     // ----------------------------------------------------------------------------------
 
-    const account_matches_jsonObject = await request({
-      headers: request_header,
-      json: true,
-      url: base + '/lol/match/v3/matchlists/by-account/' + profile.account_id
-    });
+    const matchIds = await fetchAccountMatchList(profile.account_id);
 
     // write matches for each summoner
-    for (let match of account_matches_jsonObject.matches) {
-      // console.log(match)
-
-      const match_jsonObject = await request({
-        headers: request_header,
-        json: true,
-        url: base + '/lol/match/v3/matches/' + match.gameId
-      });
-      console.log(match_jsonObject)
-
-      // MatchProfile -- player specific data
-      const match_model: MatchProfile = {
-        account_id: profile.account_id,
-        match_id: String(match.gameId),
-        played_at: new Date(), // temporary lol
-        data: {}
+    for (let matchId of matchIds) {
+      const fullMatchInfo = await fetchMatchById(matchId);
+      for (const matchProfile of fullMatchInfo.profiles) {
+        console.log(matchProfile);
+        await writeMatchProfile(matchProfile);
       }
-      // console.log(mtermatch_jsonObject.participantIdentities)
-      let playerId = ''
-      let teamId = 0
-      for (let participant of match_jsonObject.participantIdentities) {
-        if (participant.player.summonerName === profile.summoner_name)
-          // console.log('fuck you' + participant.participantId)
-          playerId = participant.participantId
-      }
+      console.log('Done writing match profiles');
 
-      for (let participant of match_jsonObject.participants) {
-        if (participant.participantId == playerId) {
-          let data = {
-            champion_played: participant.championId, // number
-            gold_earned: participant.stats.goldEarned,
-            turrets_killed: participant.stats.turrets_killed,
-            inhibitorKills: participant.stats.inhibitorKills,
-            cs_score: participant.stats.totalMinionsKilled,
-            vision_score: participant.stats.visionScore
-          }
-          match_model.data = data
-          // console.log('participant data' + JSON.stringify(data) + JSON.stringify(participant))
-          teamId = participant.teamId
-          // console.log(teamId)
-        }
-      }
-      // console.log(teamId)
-        // if (participant.player.summonerName == ctx.query.summoner_name)
-        //   participantId = participant.participantId
-
-      // console.log(match_model)
-      // await writeMatch(match_model)
-
-      // Match -- game-wide data
-      const match_profile: Match = {
-        id : String(match.gameId),
-        map: match.gameMode,
-        stats: {}
-      }
-
-      console.log('same')
-      // console.log('hello bish' + match_jsonObject.team.teamId.win)
-      if (teamId == 100) {
-        // match_jsonObject.teams[0]
-        match_profile['stats'] = {
-          towerKills: match_jsonObject.teams[0].towerKills,
-          inhibitorKills: match_jsonObject.teams[0].inhibitorKills,
-          baronKills: match_jsonObject.teams[0].baronKills,
-          dragonKills: match_jsonObject.teams[0].dragonKills
-          // bans: []
-        }
-
-        // if (match_jsonObject.length > 0){
-        //   match_profile.data.bans = {
-        //     0: match_jsonObject.teams[0].bans[0],
-        //     1: match_jsonObject.teams[0].bans[1],
-        //     2: match_jsonObject.teams[0].bans[2],
-        //     3: match_jsonObject.teams[0].bans[3],
-        //     4: match_jsonObject.teams[0].bans[4]
-        //   }
-        // }
-      }
-      else if (teamId == 200) {
-        // match_jsonObject.teams[1]
-        match_profile['stats'] = {
-          towerKills: match_jsonObject.teams[1].towerKills,
-          inhibitorKills: match_jsonObject.teams[1].inhibitorKills,
-          baronKills: match_jsonObject.teams[1].baronKills,
-          dragonKills: match_jsonObject.teams[1].dragonKills
-          // bans: []
-        }
-      }
-      // match_profile['data'] = {
-      //   // game_duration: match_jsonObject.gameDuration,
-      //   test: match_jsonObject.team.teamId.win,
-      //   // match_jsonObject.team.(team100).bans
-      //   // match_jsonObject.team.(team100).towerKills
-      //   // match_jsonObject.team.(team100).inhibitorKills
-      //   // match_jsonObject.team.(team100).baronKills
-      //   // match_jsonObject.team.(team100).dragonKills
-      //   lol: "same"
-      // }
-      // console.log(match_profile)
-      // await writeHistoryEntry(match_profile, profile)
-
-      // matchstats
-    // ],
-    // "firstInhibitor": true,
-    // "win": "Win",
-    // "firstRiftHerald": false,
-    // "firstBaron": true,
-    // "baronKills": 1,
-    // "riftHeraldKills": 0,
-    // "firstBlood": true,
-    // "teamId": 100,
-    // "firstTower": true,
-    // "vilemawKills": 0,
-    // "inhibitorKills": 3,
-    // "towerKills": 11,
-    // "dominionVictoryScore": 0,
-    // "dragonKills": 2
-    console.log('hello2')
-      await writeMatchProfile(match_model)
-      console.log('asdf')
-      await writeMatch(match_profile)
+      console.log(fullMatchInfo.match);
+      await writeMatch(fullMatchInfo.match);
+      console.log('Done writing match');
     }
 
     ctx.response.body = profile;

@@ -3,7 +3,10 @@ import * as Sequelize from 'sequelize';
 import { sequelize } from './connection';
 
 interface MatchStats {
-
+  teams: {
+    red: any,
+    blue: any,
+  }
 }
 
 // Sequelize service object.
