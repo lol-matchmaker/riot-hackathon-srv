@@ -11,6 +11,8 @@ export interface Profile {
   account_id: string,
   summoner_id: string,
   summoner_name: string,
+  solo: string,
+  flex: string,
   stats: PlayerStats,
 }
 
@@ -29,6 +31,8 @@ export const ProfileModel = sequelize.define<ProfileInstance, Profile>(
     type: Sequelize.STRING,
   },
   summoner_name: Sequelize.STRING,
+  solo: Sequelize.STRING,
+  flex: Sequelize.STRING,
   stats: Sequelize.JSON,
 }, {
   createdAt: false,

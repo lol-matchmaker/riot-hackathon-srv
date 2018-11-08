@@ -21,6 +21,8 @@ function profileFromRiotJson(riotAccountJson: any): Profile {
     account_id: riotAccountJson.accountId.toString(),  // Riot reports integers.
     summoner_id: riotAccountJson.id.toString(),  // Riot reports integers.
     summoner_name: riotAccountJson.name,
+    solo: riotAccountJson.solo,
+    flex: riotAccountJson.flex,
     stats: {},
   };
   return profile;
@@ -29,14 +31,14 @@ function profileFromRiotJson(riotAccountJson: any): Profile {
 /** Retrieves basic account information given a summoner name. */
 export async function fetchProfileByName(name: string): Promise<Profile> {
   // after that is the .then()
-  const riotAccountJson = await request({
+  let riotAccountJson = await request({
     headers: riotHttpRequestHeaders,
     json: true,
     url: `${riotBaseUrl}/lol/summoner/v3/summoners/by-name/${name}`,
   });
 
-  // const rankJson = await fetchLeagueById(36757548)
-  // console.log(rankJson)
+  const rankJson = await fetchLeagueById(36757548)
+  riotAccountJson = Object.assign(riotAccountJson, rankJson)
 
   return profileFromRiotJson(riotAccountJson);
 }
