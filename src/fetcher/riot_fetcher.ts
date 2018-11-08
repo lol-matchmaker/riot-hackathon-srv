@@ -247,7 +247,7 @@ export async function fetchSummonerVerification(summonerId: string):
     Promise<string> {
   const riotVerificationString = await request({
     headers: riotHttpRequestHeaders,
-    json: false,
+    json: true,
     url: `${riotBaseUrl}/lol/platform/v3/third-party-code/by-summoner/${summonerId}`,
   });
 
