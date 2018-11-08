@@ -9,33 +9,40 @@ import { MatchProfile, writeMatchProfile } from '../db/match_profile';
 const secret: { api_key: string } = require('./secret.js');
 
 const base = 'https://na1.api.riotgames.com';
+
 const request_header = {
   "Origin": "https://developer.riotgames.com",
-  "Accept-Charset": "application/x-www-form-urlencoded; charset=UTF-8",
-  "X-Riot-Token": secret.api_key,
+  'Accept-Charset': 'application/x-www-form-urlencoded; charset=UTF-8',
+  'X-Riot-Token': secret.api_key,
+}
+
+async function fetchProfileByName(name: string): Promise<Profile> {
+  // after that is the .then()
+  const jsonObject = await request({
+    headers: request_header,
+    json: true,
+    url: `${base}/lol/summoner/v3/summoners/by-name/${name}`,
+  });
+  // console.log(jsonObject);
+  // console.log(jsonObject.accountId);
+
+  const profile: Profile = {
+    account_id: jsonObject.accountId.toString(),  // Riot reports integers.
+    summoner_id: jsonObject.id.toString(),  // Riot reports integers.
+    summoner_name: jsonObject.name,
+    stats: {},
+  };
+  return profile;
 }
 
 const profile = {
   new: async (ctx : Koa.Context, next : () => Promise<any>) => {
     await next();
 
-    console.log(ctx.query.summoner_name)
+    const name = ctx.query.summoner_name;
+    console.log(name);
 
-    // after that is the .then()
-    const jsonObject = await request({
-      headers: request_header,
-      json: true,
-      url: base + '/lol/summoner/v3/summoners/by-name/' + ctx.query.summoner_name
-    });
-
-    const profile: Profile = {
-      account_id: String(jsonObject.accountId),
-      summoner_id: String(jsonObject.id),
-      summoner_name: jsonObject.name,
-      stats: {},
-    };
-    // console.log(jsonObject);
-    // console.log(jsonObject.accountId);
+    const profile = await fetchProfileByName(name);
     console.log(profile);
 
     // create each summoner's profile
@@ -46,7 +53,7 @@ const profile = {
     const account_matches_jsonObject = await request({
       headers: request_header,
       json: true,
-      url: base + '/lol/match/v3/matchlists/by-account/' + jsonObject.accountId
+      url: base + '/lol/match/v3/matchlists/by-account/' + profile.account_id
     });
 
     // write matches for each summoner
@@ -71,7 +78,7 @@ const profile = {
       let playerId = ''
       let teamId = 0
       for (let participant of match_jsonObject.participantIdentities) {
-        if (participant.player.summonerName === jsonObject.name)
+        if (participant.player.summonerName === profile.summoner_name)
           // console.log('fuck you' + participant.participantId)
           playerId = participant.participantId
       }
@@ -173,13 +180,7 @@ const profile = {
       await writeMatch(match_profile)
     }
 
-
-
-    ctx.response.body = {
-      account_id: jsonObject.accountId,
-      summoner_id: jsonObject.id,
-      summoner_name: ctx.query.summoner_name
-    };
+    ctx.response.body = profile;
   },
 };
 
