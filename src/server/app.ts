@@ -1,38 +1,24 @@
-import * as Koa from 'koa';
-import * as koaCors from '@koa/cors';
-import * as koaJson from 'koa-json';
-import * as KoaRouter from 'koa-router';
+import Koa = require('koa');
+import koaCors = require('@koa/cors');
+import koaJson = require('koa-json');
+import KoaRouter = require('koa-router');
 
+// import match from './match';
+import profile from './profile';
 import status from './status';
 
 const router = new KoaRouter();
-
-router.get('/profiles/:id/history/:queue_name', readers.readProfileHistory);
-router.get('/profiles/:id/history', readers.readProfileHistory);
-router.get('/profiles/:id/matches/:queue_name', readers.readProfileMatches);
-router.get('/profiles/:id/matches', readers.readProfileMatches);
-router.get('/profiles/:id', readers.readProfile);
-router.get('/matches/:id/histories', readers.readMatchHistories);
-router.get('/matches/:id', readers.readMatch);
-
-router.get('/fetch/profiles/:id', readers.fetchProfile);
-router.get('/fetch/profiles/:id/history/:queue_name',
-           readers.fetchProfileHistory);
-router.get('/fetch/profiles/:id/matches/:queue_name',
-           readers.fetchProfileMatches);
-router.get('/fetch/matches/:id/histories', readers.fetchMatchHistories);
-router.get('/fetch/matches/:id', readers.fetchMatch);
-
-router.get('/paged/profiles/:start', pagers.pagedProfiles);
-router.get('/paged/profiles/', pagers.pagedProfiles);
-router.get('/paged/matches/:start', pagers.pagedMatches);
-router.get('/paged/matches/', pagers.pagedMatches);
 
 router.get('/status/pool', status.pool);
 router.get('/status/memory', status.memory);
 router.get('/status', status.index);
 
+router.get('/profile/new', profile.new); // GET /profile/new?summoner_name=...
+
+// router.get('/match', match.id)
+
 export const app = new Koa();
+
 app.use(koaCors());
 app.use(koaJson({ pretty: false, param: 'pretty_json' }));
 app.use(router.routes()).use(router.allowedMethods());

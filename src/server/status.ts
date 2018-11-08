@@ -1,6 +1,6 @@
-import * as v8 from 'v8';
+import v8 = require('v8');
 
-import * as Koa from 'koa';
+import Koa = require('koa');
 
 const status = {
   index: async (ctx : Koa.Context, next : () => Promise<any>) => {
