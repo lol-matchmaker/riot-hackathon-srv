@@ -21,6 +21,8 @@ function profileFromRiotJson(riotAccountJson: any): Profile {
     account_id: riotAccountJson.accountId.toString(),  // Riot reports integers.
     summoner_id: riotAccountJson.id.toString(),  // Riot reports integers.
     summoner_name: riotAccountJson.name,
+    solo: riotAccountJson.solo,
+    flex: riotAccountJson.flex,
     stats: {},
   };
   return profile;
@@ -29,23 +31,47 @@ function profileFromRiotJson(riotAccountJson: any): Profile {
 /** Retrieves basic account information given a summoner name. */
 export async function fetchProfileByName(name: string): Promise<Profile> {
   // after that is the .then()
-  const riotAccountJson = await request({
+  let riotAccountJson = await request({
     headers: riotHttpRequestHeaders,
     json: true,
     url: `${riotBaseUrl}/lol/summoner/v3/summoners/by-name/${name}`,
   });
 
+  const rankJson = await fetchLeagueById(riotAccountJson.summonerId.toString());
+  riotAccountJson = Object.assign(riotAccountJson, rankJson);
+
   return profileFromRiotJson(riotAccountJson);
+}
+
+/** Retrieves league information given a summoner id. */
+export async function fetchLeagueById(summonerId: string): Promise<any> {
+  // after that is the .then()
+  const rankJson = await request({
+    headers: riotHttpRequestHeaders,
+    json: true,
+    url: `${riotBaseUrl}/lol/league/v3/positions/by-summoner/${summonerId}`,
+  });
+
+  const flex_queue_data = rankJson[0];
+  const solo_queue_data = rankJson[1];
+
+  return {
+    solo: `${solo_queue_data.tier} ${solo_queue_data.rank}`,
+    flex: `${flex_queue_data.tier} ${flex_queue_data.rank}`
+  };
 }
 
 /** Retrieves basic account information given an account ID. */
 export async function fetchProfileByAccountId(accountId: string):
     Promise<Profile> {
-  const riotAccountJson = await request({
+  let riotAccountJson = await request({
     headers: riotHttpRequestHeaders,
     json: true,
     url: `${riotBaseUrl}/lol/summoner/v3/summoners/by-account/${accountId}`,
   });
+
+  const rankJson = await fetchLeagueById(riotAccountJson.summonerId.toString());
+  riotAccountJson = Object.assign(riotAccountJson, rankJson);
 
   return profileFromRiotJson(riotAccountJson);
 }
@@ -59,7 +85,7 @@ export async function fetchAccountMatchList(accountId: string):
     url: `${riotBaseUrl}/lol/match/v3/matchlists/by-account/${accountId}`,
   });
 
-  return jsonObject.matches.map((match: any) => match.gameId as string);
+  return jsonObject.matches.map((match: any) => match.gameId.toString());
 }
 
 /** Turns Riot team IDs into readable names. */
@@ -179,4 +205,15 @@ export async function fetchMatchById(matchId: string): Promise<FullMatchInfo> {
     match: match,
     profiles: matchProfiles,
   };
+}
+
+export async function fetchSummonerVerification(summonerId: string):
+    Promise<string> {
+  const riotVerificationString = await request({
+    headers: riotHttpRequestHeaders,
+    json: false,
+    url: `${riotBaseUrl}/lol/platform/v3/third-party-code/by-summoner/${summonerId}`,
+  });
+
+  return riotVerificationString;
 }

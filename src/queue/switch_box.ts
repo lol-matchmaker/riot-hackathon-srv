@@ -1,3 +1,4 @@
+import crypto = require('crypto');
 import http = require('http');
 import WebSocket = require('ws');
 

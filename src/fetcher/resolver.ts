@@ -10,16 +10,39 @@ export async function findProfileByAccountId(accountId: string):
     return cachedProfile;
   }
 
-  const profile = await fetchProfileByAccountId(accountId);
-  await writeProfile(profile);
+  let profile;
+  try {
+    profile = await fetchProfileByAccountId(accountId);
+  } catch (readError) {
+    console.error(`Failed to read Profile ${accountId}`);
+    throw readError;
+  }
+  try {
+    await writeProfile(profile);
+  } catch (writeError) {
+    console.error(`Failed to write Profile ${profile.account_id}`);
+    throw writeError;
+  }
   return profile;
 }
 
 export async function findMatch(matchId: string): Promise<FullMatchInfo> {
-  const cachedMatch = await readMatch(matchId);
+  let cachedMatch;
+  try {
+    cachedMatch = await readMatch(matchId);
+  } catch (readError) {
+    console.error(`Failed to read Match ${matchId}`);
+    throw readError;
+  }
   if (cachedMatch !== null) {
-    const cachedMatchProfiles = await readMatchMetadata(matchId);
-    // TODO(pwnall): Replace with correct length.
+    let cachedMatchProfiles;
+    try {
+      cachedMatchProfiles = await readMatchMetadata(matchId);
+    } catch (readError) {
+      console.error(`Failed to read MatchProfiles for Match ${matchId}`);
+      throw readError;
+    }
+    // TODO(pwnall): Check against correct length.
     if (cachedMatchProfiles.length !== 0) {
       return {
         match: cachedMatch,
@@ -30,12 +53,21 @@ export async function findMatch(matchId: string): Promise<FullMatchInfo> {
 
   const fullMatchInfo = await fetchMatchById(matchId);
   for (const matchProfile of fullMatchInfo.profiles) {
-    await writeMatchProfile(matchProfile);
+    try {
+      await writeMatchProfile(matchProfile);
+    } catch(writeError) {
+      console.error(
+        `Failed to write MatchProfile for match=${matchProfile.match_id} ` +
+        `account=${matchProfile.account_id}`);
+    }
   }
-  console.log('Done writing match profiles');
 
-  await writeMatch(fullMatchInfo.match);
-  console.log('Done writing match');
+  const match = fullMatchInfo.match;
+  try {
+    await writeMatch(match);
+  } catch(writeError) {
+    console.error(`Failed to write Match ${match.id}`);
+  }
 
   return fullMatchInfo;
 }

@@ -1,7 +1,10 @@
+import path = require('path');
+
 import Koa = require('koa');
 import koaCors = require('@koa/cors');
 import koaJson = require('koa-json');
 import KoaRouter = require('koa-router');
+import koaStatic = require('koa-static');
 
 import matches from './matches';
 import profiles from './profiles';
@@ -30,4 +33,6 @@ export const app = new Koa();
 
 app.use(koaCors());
 app.use(koaJson({ pretty: false, param: 'pretty_json' }));
+app.use(koaStatic(path.join(path.dirname(__dirname), 'static'),
+        {index: 'index.html'}));
 app.use(router.routes()).use(router.allowedMethods());
