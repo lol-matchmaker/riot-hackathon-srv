@@ -42,6 +42,7 @@ class gameAnalyzer {
         }
         if(!gameData["seasonId"]) {
             console.log("ded");
+            console.log(gameData);
             return;
         }
         // console.log(gameData);
@@ -109,11 +110,11 @@ class gameAnalyzer {
         
         for(var i in this.classes) {
             var curClass = this.classes[i];
-            if(curClass["gamesPlayed"] > 40) {
-                this.tags.push(`High ${i} player`);
-            }
-            else if(curClass["gamesPlayed"] > 25) {
-                this.tags.push(`${i} player`);
+            // if(curClass["gamesPlayed"] > 40) {
+            //     this.tags.push(`High ${i} player`);
+            // }
+            if(curClass["gamesPlayed"] > 25) {
+                this.tags.push(`${i}`);
             }
             else if(curClass["gamesPlayed"] > 10 && curClass["winrate"] > .65) {
                 this.tags.push(`High WR with ${i}`);

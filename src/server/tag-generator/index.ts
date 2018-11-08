@@ -6,7 +6,7 @@ async function generateTags(summonerId : any) {
     // Will generate tages for the given Summoner Name
     var url = `https://na1.api.riotgames.com/lol/match/v3/matchlists/by-account/${summonerId}?endIndex=100&queue=440`;
     // url += "&api_key=" + process.env["RIOTKEY"];
-    url += "&api_key=";
+    url += "&api_key=RGAPI-5d326d57-5f0d-4c19-a377-fc020817d993";
     request.get(url, (res:any, err:any, body:any) => {
         var playersGames = JSON.parse(body);
         if(playersGames["matches"] == undefined) { // There was an error probably
@@ -41,7 +41,7 @@ async function getClassDict(gameArray:Array<JSON>) {
         // await asyncSleep(100);
     }
     await Promise.all(promisies);
-    console.log(cA.getStats());
+    console.log(cA.getClasses());
     cA.generateClassTags();
     cA.generateStatTags();
     console.log(cA.getTags());
@@ -49,4 +49,4 @@ async function getClassDict(gameArray:Array<JSON>) {
 }
 
 
-generateTags("49843177")
+generateTags("47143896")
