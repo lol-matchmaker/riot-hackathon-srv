@@ -101,7 +101,7 @@ const profile = {
 
       // Match -- game-wide data
       const match_profile: Match = {
-        id : match.gameId,
+        id : String(match.gameId),
         map: match.gameMode,
         stats: {}
       }
