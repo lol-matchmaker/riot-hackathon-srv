@@ -35,7 +35,28 @@ export async function fetchProfileByName(name: string): Promise<Profile> {
     url: `${riotBaseUrl}/lol/summoner/v3/summoners/by-name/${name}`,
   });
 
+  // const rankJson = await fetchLeagueById(36757548)
+  // console.log(rankJson)
+
   return profileFromRiotJson(riotAccountJson);
+}
+
+/** Retrieves league information given a summoner id. */
+export async function fetchLeagueById(id: Number): Promise<any> {
+  // after that is the .then()
+  const rankJson = await request({
+    headers: riotHttpRequestHeaders,
+    json: true,
+    url: `${riotBaseUrl}/lol/league/v3/positions/by-summoner/${id}`,
+  });
+
+  const flex_queue_data = rankJson[0]
+  const solo_queue_data = rankJson[1]
+
+  return {
+    solo: `${solo_queue_data.tier} ${solo_queue_data.rank}`,
+    flex: `${flex_queue_data.tier} ${flex_queue_data.rank}`
+  }
 }
 
 /** Retrieves basic account information given an account ID. */
