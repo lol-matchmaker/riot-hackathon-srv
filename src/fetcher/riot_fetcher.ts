@@ -37,7 +37,7 @@ export async function fetchProfileByName(name: string): Promise<Profile> {
     url: `${riotBaseUrl}/lol/summoner/v3/summoners/by-name/${name}`,
   });
 
-  const rankJson = await fetchLeagueById(riotAccountJson.summonerId.toString());
+  const rankJson = await fetchLeagueById(riotAccountJson.id.toString());
   riotAccountJson = Object.assign(riotAccountJson, rankJson);
 
   return profileFromRiotJson(riotAccountJson);
@@ -46,19 +46,33 @@ export async function fetchProfileByName(name: string): Promise<Profile> {
 /** Retrieves league information given a summoner id. */
 export async function fetchLeagueById(summonerId: string): Promise<any> {
   // after that is the .then()
-  const rankJson = await request({
+  const riotLeagueJson = await request({
     headers: riotHttpRequestHeaders,
     json: true,
     url: `${riotBaseUrl}/lol/league/v3/positions/by-summoner/${summonerId}`,
   });
 
-  const flex_queue_data = rankJson[0];
-  const solo_queue_data = rankJson[1];
+  const leagueData: { [key: string]: string } = { solo: '', flex: '' };
 
-  return {
-    solo: `${solo_queue_data.tier} ${solo_queue_data.rank}`,
-    flex: `${flex_queue_data.tier} ${flex_queue_data.rank}`
-  };
+  for (const riotLeagueInfo of riotLeagueJson) {
+    let dataKey: string | null = null;
+    switch (riotLeagueInfo.queueType) {
+      case 'RANKED_SOLO_5x5':
+        dataKey = 'solo';
+        break;
+      case 'RANKED_FLEX_SR':
+        dataKey = 'flex';
+        break;
+      default:
+        break;
+    }
+    if (dataKey === null) {
+      continue;
+    }
+    leagueData[dataKey] = `${riotLeagueInfo.tier} ${riotLeagueInfo.rank}`;
+  }
+
+  return leagueData;
 }
 
 /** Retrieves basic account information given an account ID. */
@@ -70,7 +84,7 @@ export async function fetchProfileByAccountId(accountId: string):
     url: `${riotBaseUrl}/lol/summoner/v3/summoners/by-account/${accountId}`,
   });
 
-  const rankJson = await fetchLeagueById(riotAccountJson.summonerId.toString());
+  const rankJson = await fetchLeagueById(riotAccountJson.id.toString());
   riotAccountJson = Object.assign(riotAccountJson, rankJson);
 
   return profileFromRiotJson(riotAccountJson);
@@ -183,6 +197,13 @@ function matchProfilesFromRiotMatchJson(match_jsonObject: any, match: Match):
         vision_score: participant.stats.visionScore,
         team_name: teamName,
         team_stats: match.stats.teams[teamName],
+        kills: participant.stats.kills,
+        deaths: participant.stats.deaths,
+        assists: participant.stats.assists,
+        duration: match_jsonObject.gameDuration,
+        cs_difference_0_10: participant.timeline.csDiffPerMinDeltas['0-10'],
+        cs_difference_10_20: participant.timeline.csDiffPerMinDeltas['10-20'],
+        cs_difference_20_30: participant.timeline.csDiffPerMinDeltas['20-30']
       },
     };
     matchProfiles.push(matchProfile);
