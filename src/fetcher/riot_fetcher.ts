@@ -51,15 +51,28 @@ export async function fetchLeagueById(summonerId: string): Promise<any> {
     json: true,
     url: `${riotBaseUrl}/lol/league/v3/positions/by-summoner/${summonerId}`,
   });
-  console.log(riotLeagueJson);
 
-  const flex_queue_data = riotLeagueJson[0];
-  const solo_queue_data = riotLeagueJson[1];
+  const leagueData: { [key: string]: string } = { solo: '', flex: '' };
 
-  return {
-    solo: `${solo_queue_data.tier} ${solo_queue_data.rank}`,
-    flex: `${flex_queue_data.tier} ${flex_queue_data.rank}`
-  };
+  for (const riotLeagueInfo of riotLeagueJson) {
+    let dataKey: string | null = null;
+    switch (riotLeagueInfo.queueType) {
+      case 'RANKED_SOLO_5x5':
+        dataKey = 'solo';
+        break;
+      case 'RANKED_FLEX_SR':
+        dataKey = 'flex';
+        break;
+      default:
+        break;
+    }
+    if (dataKey === null) {
+      continue;
+    }
+    leagueData[dataKey] = `${riotLeagueInfo.tier} ${riotLeagueInfo.rank}`;
+  }
+
+  return leagueData;
 }
 
 /** Retrieves basic account information given an account ID. */
