@@ -184,6 +184,13 @@ function matchProfilesFromRiotMatchJson(match_jsonObject: any, match: Match):
         vision_score: participant.stats.visionScore,
         team_name: teamName,
         team_stats: match.stats.teams[teamName],
+        kills: participant.stats.kills,
+        deaths: participant.stats.deaths,
+        assists: participant.stats.assists,
+        duration: match_jsonObject.gameDuration,
+        cs_difference_0_10: participant.timeline.csDiffPerMinDeltas['0-10'],
+        cs_difference_10_20: participant.timeline.csDiffPerMinDeltas['10-20'],
+        cs_difference_20_30: participant.timeline.csDiffPerMinDeltas['20-30']
       },
     };
     matchProfiles.push(matchProfile);
