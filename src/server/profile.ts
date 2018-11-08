@@ -1,5 +1,5 @@
-import * as Koa from 'koa';
-import * as request from 'request-promise-native';
+import Koa = require('koa');
+import request = require('request-promise-native');
 
 import { writeProfile, Profile } from '../db/profile';
 // import { writeMatch, Match } from '../db/match';
