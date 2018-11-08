@@ -1,5 +1,7 @@
-import * as Koa from 'koa';
-import { writeMatch, MatchModel } from '../db/match';
+import Koa = require('koa');
+import request = require('request-promise-native');
+
+// import { writeMatch, MatchModel } from '../db/match';
 
 const secret: { api_key: string } = require('./secret.js');
 

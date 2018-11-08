@@ -1,7 +1,7 @@
-import * as Koa from 'koa';
-import * as koaCors from '@koa/cors';
-import * as koaJson from 'koa-json';
-import * as KoaRouter from 'koa-router';
+import Koa = require('koa');
+import koaCors = require('@koa/cors');
+import koaJson = require('koa-json');
+import KoaRouter = require('koa-router');
 
 // import match from './match';
 import profile from './profile';
