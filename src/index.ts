@@ -9,7 +9,8 @@ const main = async () => {
 
   const multiplexer = new Multiplexer(app,
                                       parseInt(process.env['PORT'] || '3000'));
-  multiplexer.listen();
+  await multiplexer.listen();
+  console.log(`Listening on ${multiplexer.listenAddress()}`);
 };
 
 main();
