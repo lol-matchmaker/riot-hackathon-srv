@@ -67,8 +67,9 @@ const profile = {
 
         }
       }
-      console.log(match_jsonObject.participantIdentities)
+      // console.log(match_jsonObject.participantIdentities)
       let playerId = ''
+      let teamId = 0
       for (let participant of match_jsonObject.participantIdentities) {
         if (participant.player.summonerName === jsonObject.name)
           console.log('fuck you' + participant.participantId)
@@ -83,15 +84,18 @@ const profile = {
             turrets_killed: participant.stats.turrets_killed,
             inhibitorKills: participant.stats.inhibitorKills,
             cs_score: participant.stats.totalMinionsKilled,
-            wards_placed: participant.stats.wardsPlaced,
+            vision_score: participant.stats.visionScore
           }
-          console.log('participant data' + JSON.stringify(data))
+          // console.log('participant data' + JSON.stringify(data) + JSON.stringify(participant))
+          teamId = participant.teamId
+          // console.log(teamId)
         }
       }
+      // console.log(teamId)
         // if (participant.player.summonerName == ctx.query.summoner_name)
         //   participantId = participant.participantId
 
-      console.log(match_model)
+      // console.log(match_model)
       // await writeMatch(match_model)
 
       // Match -- game-wide data
@@ -100,10 +104,45 @@ const profile = {
         queue_name: match.queue,
         map_type: match.gameMode,
         data: {
-          game_duration: match_jsonObject.gameDuration
+
         }
       }
-      console.log(match_profile)
+
+      // console.log('hello bish' + match_jsonObject.team.teamId.win)
+      if (teamId == 100) {
+        // match_jsonObject.teams[0]
+        match_profile['data'] = {
+          towerKills: match_jsonObject.teams[0].towerKills,
+          inhibitorKills: match_jsonObject.teams[0].inhibitorKills,
+          baronKills: match_jsonObject.teams[0].baronKills,
+          dragonKills: match_jsonObject.teams[0].dragonKills
+          // bans: []
+        }
+
+        // if (match_jsonObject.length > 0){
+        //   match_profile.data.bans = {
+        //     0: match_jsonObject.teams[0].bans[0],
+        //     1: match_jsonObject.teams[0].bans[1],
+        //     2: match_jsonObject.teams[0].bans[2],
+        //     3: match_jsonObject.teams[0].bans[3],
+        //     4: match_jsonObject.teams[0].bans[4]
+        //   }
+        // }
+      }
+      else if (teamId == 200) {
+        // match_jsonObject.teams[1]
+      }
+      // match_profile['data'] = {
+      //   // game_duration: match_jsonObject.gameDuration,
+      //   test: match_jsonObject.team.teamId.win,
+      //   // match_jsonObject.team.(team100).bans
+      //   // match_jsonObject.team.(team100).towerKills
+      //   // match_jsonObject.team.(team100).inhibitorKills
+      //   // match_jsonObject.team.(team100).baronKills
+      //   // match_jsonObject.team.(team100).dragonKills
+      //   lol: "same"
+      // }
+      // console.log(match_profile)
       // await writeHistoryEntry(match_profile, profile)
 
       // matchstats
