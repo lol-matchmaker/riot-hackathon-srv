@@ -59,22 +59,31 @@ const isAggressiveMatch = async (match_id: number, summonerName: string) => {
     return false
 }
 
+// Returns true if aggressive game count % is greater than 50% in a game, else false
 const isAggressivePlayer = async(accountId: number) => {
+    let game_count = 0
+    let aggressive_game_count = 0
+
     const matchJson = await request({
         headers: {'X-Riot-Token': secret.api_key},
         json: true,
         url: `https://na1.api.riotgames.com/lol/match/v3/matchlists/by-account/${accountId}`,
     });
 
-    for (let match of matchJson.participantIdentities) {
-        console.log(match)
+    for (let match of matchJson.matches) {
+        let isAggressive = await isAggressiveMatch(match.gameId, 'Vauss')
+        game_count += 1
+        if (isAggressive) {
+            aggressive_game_count += 1
+        }
     }
+
+    if (aggressive_game_count / game_count > 0.5) {
+        return true
+    }
+    return false
 }
 
 isAggressivePlayer(51345606).then(function(res) {
     console.log(res)
 })
-isAggressiveMatch(2904607483, 'Vauss').then(function(res) {
-    console.log(res)
-})
-
