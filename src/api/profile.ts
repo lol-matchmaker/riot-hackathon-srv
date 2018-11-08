@@ -47,7 +47,7 @@ const profile = {
       headers: request_header,
       json: true,
       url: base + '/lol/match/v3/matchlists/by-account/' + jsonObject.accountId
-    }); 
+    });
 
     // write matches for each summoner
     for (let match of account_matches_jsonObject.matches) {
@@ -57,7 +57,7 @@ const profile = {
         headers: request_header,
         json: true,
         url: base + '/lol/match/v3/matches/' + match.gameId
-      }); 
+      });
       console.log(match_jsonObject)
 
       // MatchProfile -- player specific data

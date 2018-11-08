@@ -1,8 +1,8 @@
 import 'source-map-support/register';
 
+import { app } from './api/app';
 import { sequelize } from './db/connection';
 import { Multiplexer } from './queue/multiplexer';
-import { app } from './server/app';
 
 const main = async () => {
   await sequelize.sync();
