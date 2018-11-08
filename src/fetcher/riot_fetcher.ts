@@ -37,7 +37,7 @@ export async function fetchProfileByName(name: string): Promise<Profile> {
     url: `${riotBaseUrl}/lol/summoner/v3/summoners/by-name/${name}`,
   });
 
-  const rankJson = await fetchLeagueById(riotAccountJson.summonerId.toString());
+  const rankJson = await fetchLeagueById(riotAccountJson.id.toString());
   riotAccountJson = Object.assign(riotAccountJson, rankJson);
 
   return profileFromRiotJson(riotAccountJson);
@@ -46,14 +46,15 @@ export async function fetchProfileByName(name: string): Promise<Profile> {
 /** Retrieves league information given a summoner id. */
 export async function fetchLeagueById(summonerId: string): Promise<any> {
   // after that is the .then()
-  const rankJson = await request({
+  const riotLeagueJson = await request({
     headers: riotHttpRequestHeaders,
     json: true,
     url: `${riotBaseUrl}/lol/league/v3/positions/by-summoner/${summonerId}`,
   });
+  console.log(riotLeagueJson);
 
-  const flex_queue_data = rankJson[0];
-  const solo_queue_data = rankJson[1];
+  const flex_queue_data = riotLeagueJson[0];
+  const solo_queue_data = riotLeagueJson[1];
 
   return {
     solo: `${solo_queue_data.tier} ${solo_queue_data.rank}`,
@@ -70,7 +71,7 @@ export async function fetchProfileByAccountId(accountId: string):
     url: `${riotBaseUrl}/lol/summoner/v3/summoners/by-account/${accountId}`,
   });
 
-  const rankJson = await fetchLeagueById(riotAccountJson.summonerId.toString());
+  const rankJson = await fetchLeagueById(riotAccountJson.id.toString());
   riotAccountJson = Object.assign(riotAccountJson, rankJson);
 
   return profileFromRiotJson(riotAccountJson);
