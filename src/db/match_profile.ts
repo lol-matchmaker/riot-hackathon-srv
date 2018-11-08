@@ -4,7 +4,6 @@ import * as Sequelize from 'sequelize';
 import { sequelize } from './connection';
 
 interface MatchProfileStats {
-
 }
 
 // Connection between a match and a profile.

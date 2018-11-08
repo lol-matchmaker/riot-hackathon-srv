@@ -2,8 +2,9 @@ import Koa = require('koa');
 import request = require('request-promise-native');
 
 import { writeProfile, Profile } from '../db/profile';
-// import { writeMatch, Match } from '../db/match';
-// import { writeHistoryEntry, MatchProfile } from '../db/match_profile';
+import { writeMatch, Match } from '../db/match';
+import { MatchProfile, writeMatchProfile } from '../db/match_profile';
+// import { writeMatch } from '../db/match';
 
 const secret: { api_key: string } = require('./secret.js');
 
@@ -33,8 +34,8 @@ const profile = {
       summoner_name: jsonObject.name,
       stats: {},
     };
-    console.log(jsonObject);
-    console.log(jsonObject.accountId);
+    // console.log(jsonObject);
+    // console.log(jsonObject.accountId);
     console.log(profile);
 
     // create each summoner's profile
@@ -50,7 +51,7 @@ const profile = {
 
     // write matches for each summoner
     for (let match of account_matches_jsonObject.matches) {
-      console.log(match)
+      // console.log(match)
 
       const match_jsonObject = await request({
         headers: request_header,
@@ -60,19 +61,18 @@ const profile = {
       console.log(match_jsonObject)
 
       // MatchProfile -- player specific data
-      const match_model = {
-        profile_id: profile.account_id,
+      const match_model: MatchProfile = {
+        account_id: profile.account_id,
         match_id: String(match.gameId),
-        stats: {
-
-        }
+        played_at: new Date(), // temporary lol
+        data: {}
       }
-      // console.log(match_jsonObject.participantIdentities)
+      // console.log(mtermatch_jsonObject.participantIdentities)
       let playerId = ''
       let teamId = 0
       for (let participant of match_jsonObject.participantIdentities) {
         if (participant.player.summonerName === jsonObject.name)
-          console.log('fuck you' + participant.participantId)
+          // console.log('fuck you' + participant.participantId)
           playerId = participant.participantId
       }
 
@@ -86,6 +86,7 @@ const profile = {
             cs_score: participant.stats.totalMinionsKilled,
             vision_score: participant.stats.visionScore
           }
+          match_model.data = data
           // console.log('participant data' + JSON.stringify(data) + JSON.stringify(participant))
           teamId = participant.teamId
           // console.log(teamId)
@@ -99,19 +100,17 @@ const profile = {
       // await writeMatch(match_model)
 
       // Match -- game-wide data
-      const match_profile = {
-        match_id : match.gameId,
-        queue_name: match.queue,
-        map_type: match.gameMode,
-        data: {
-
-        }
+      const match_profile: Match = {
+        id : match.gameId,
+        map: match.gameMode,
+        stats: {}
       }
 
+      console.log('same')
       // console.log('hello bish' + match_jsonObject.team.teamId.win)
       if (teamId == 100) {
         // match_jsonObject.teams[0]
-        match_profile['data'] = {
+        match_profile['stats'] = {
           towerKills: match_jsonObject.teams[0].towerKills,
           inhibitorKills: match_jsonObject.teams[0].inhibitorKills,
           baronKills: match_jsonObject.teams[0].baronKills,
@@ -131,6 +130,13 @@ const profile = {
       }
       else if (teamId == 200) {
         // match_jsonObject.teams[1]
+        match_profile['stats'] = {
+          towerKills: match_jsonObject.teams[1].towerKills,
+          inhibitorKills: match_jsonObject.teams[1].inhibitorKills,
+          baronKills: match_jsonObject.teams[1].baronKills,
+          dragonKills: match_jsonObject.teams[1].dragonKills
+          // bans: []
+        }
       }
       // match_profile['data'] = {
       //   // game_duration: match_jsonObject.gameDuration,
@@ -161,8 +167,13 @@ const profile = {
     // "towerKills": 11,
     // "dominionVictoryScore": 0,
     // "dragonKills": 2
-      
+    console.log('hello2')
+      await writeMatchProfile(match_model)
+      console.log('asdf')
+      await writeMatch(match_profile)
     }
+
+
 
     ctx.response.body = {
       account_id: jsonObject.accountId,
