@@ -3,8 +3,8 @@ import koaCors = require('@koa/cors');
 import koaJson = require('koa-json');
 import KoaRouter = require('koa-router');
 
-// import match from './match';
-import profile from './profile';
+import matches from './matches';
+import profiles from './profiles';
 import status from './status';
 
 const router = new KoaRouter();
@@ -13,7 +13,16 @@ router.get('/status/pool', status.pool);
 router.get('/status/memory', status.memory);
 router.get('/status', status.index);
 
-router.get('/profile/new', profile.new); // GET /profile/new?summoner_name=...
+// GET /matches/account/(account_id)
+router.get('/matches/account/:id', matches.byAccountId);
+// GET /matches/details/(match_id)
+router.get('/matches/details/:id', matches.byMatchId);
+
+
+// GET /profiles/(account_id)
+router.get('/profiles/:id', profiles.byAccountId);
+// GET /profile_by_name/(summoner_name)
+router.get('/profile_by_name/:name', profiles.byName);
 
 // router.get('/match', match.id)
 

@@ -41,8 +41,8 @@ export async function writeMatch(match: Match) {
 }
 
 // Fetch a match from the database cache.
-export async function readMatch(replayId: string): Promise<Match | null> {
-  const match = await MatchModel.findById(replayId);
+export async function readMatch(matchId: string): Promise<Match | null> {
+  const match = await MatchModel.findById(matchId);
   if (match === null)
     return null;
 

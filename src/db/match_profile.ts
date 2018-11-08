@@ -66,7 +66,7 @@ export async function readProfileMatchMetadata(accountId: string)
   return records;
 }
 
-// Fetch metadata for all the matches associated with a profile.
+// Fetch metadata for all the matches associated with some profiles.
 //
 // If the cache does not contain all the requested data, returns the subset of
 // the requested metadata that does exist.

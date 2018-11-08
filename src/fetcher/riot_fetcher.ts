@@ -39,11 +39,12 @@ export async function fetchProfileByName(name: string): Promise<Profile> {
 }
 
 /** Retrieves basic account information given an account ID. */
-export async function fetchProfileByAccountId(id: string): Promise<Profile> {
+export async function fetchProfileByAccountId(accountId: string):
+    Promise<Profile> {
   const riotAccountJson = await request({
     headers: riotHttpRequestHeaders,
     json: true,
-    url: `${riotBaseUrl}/lol/summoner/v3/summoners/by-account/${id}`,
+    url: `${riotBaseUrl}/lol/summoner/v3/summoners/by-account/${accountId}`,
   });
 
   return profileFromRiotJson(riotAccountJson);
