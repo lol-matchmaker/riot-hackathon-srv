@@ -2,7 +2,6 @@ import * as Sequelize from 'sequelize';
 
 
 import { sequelize } from './connection';
-import { Profile } from './profile';
 
 interface MatchProfileStats {
 
@@ -10,9 +9,8 @@ interface MatchProfileStats {
 
 // Connection between a match and a profile.
 export interface MatchProfile {
-  profile_id : string,
-  match_id : string,
-  queue_name: string,
+  account_id: string,
+  match_id: string,
   played_at: Date,
   data: MatchProfileStats,
 }
@@ -22,12 +20,11 @@ interface MatchProfileInstance extends Sequelize.Instance<MatchProfile>,
     MatchProfile {
 }
 
-// Sequelzie model for MatchProfileData.
+// Sequelize model for MatchProfileData.
 export const MatchProfileModel =
     sequelize.define<MatchProfileInstance, MatchProfile>('match_profile', {
-  profile_id: Sequelize.STRING,
+  account_id: Sequelize.STRING,
   match_id: Sequelize.STRING,
-  queue_name: Sequelize.STRING,
   played_at: Sequelize.DATE,
   data : Sequelize.JSON,
 }, {
@@ -35,20 +32,20 @@ export const MatchProfileModel =
   updatedAt: 'updated_at',
   indexes: [
     // Fetch all the matches belonging to a player.
-    { unique: true, fields: [ 'profile_id', 'match_id' ]},
+    { unique: true, fields: [ 'account_id', 'match_id' ]},
 
     // Fetch all the players beloning to a match.
     // This is only useful if the match hasn't been populated. Otherwise, the
     // match data should have all the player IDs in it.
-    { unique: true, fields: [ 'match_id', 'profile_id' ]},
+    { unique: true, fields: [ 'match_id', 'account_id' ]},
   ]
 });
 
-export async function readMatchProfile(playerId : string, replayId : string)
+export async function readMatchProfile(accountId : string, matchId : string)
     : Promise<MatchProfile | null> {
   const record = await MatchProfileModel.findOne({ where: {
-      profile_id: { [Sequelize.Op.eq]: playerId },
-      match_id: { [Sequelize.Op.eq]: replayId },
+    account_id: { [Sequelize.Op.eq]: accountId },
+    match_id: { [Sequelize.Op.eq]: matchId },
   }});
   if (record === null)
     return null;
@@ -56,24 +53,16 @@ export async function readMatchProfile(playerId : string, replayId : string)
   return record;
 }
 
-// Write a MatchProfile record extracted from a MatchHistoryEntry.
-export async function writeHistoryEntry(
-    entry : MatchHistoryEntry, profile : Profile) {
-  await MatchProfileModel.upsert({
-    profile_id: entry.playerId,
-    match_id: entry.replayId,
-    played_at: entry.time,
-    stats: {},
-  });
+// Write a MatchProfile record.
+export async function writeMatchProfile(matchProfile: MatchProfile) {
+  await MatchProfileModel.upsert(matchProfile);
 }
 
 // Fetch metadata for all the matches associated with a profile.
-export async function readProfileMatchMetadata(
-    playerId : string, queueName : string)
+export async function readProfileMatchMetadata(accountId: string)
     : Promise<MatchProfile[]> {
   const records = await MatchProfileModel.findAll({ where: {
-      profile_id: { [Sequelize.Op.eq]: playerId },
-      queue_name: queueName,
+    account_id: { [Sequelize.Op.eq]: accountId },
   }});
   return records;
 }
@@ -82,10 +71,10 @@ export async function readProfileMatchMetadata(
 //
 // If the cache does not contain all the requested data, returns the subset of
 // the requested metadata that does exist.
-export async function readProfilesMatchMetadata(playerIds : string[])
+export async function readProfilesMatchMetadata(accountIds: string[])
     : Promise<MatchProfile[]> {
   const records = await MatchProfileModel.findAll({ where: {
-    profile_id: { [Sequelize.Op.in]: playerIds },
+    account_id: { [Sequelize.Op.in]: accountIds },
   }});
 
   return records;
@@ -96,10 +85,10 @@ export async function readProfilesMatchMetadata(playerIds : string[])
 // Metadata entries connect matches with player profiles, so a match can have up
 // to 10 metadata entries. The metadata is a subset of the data returned by
 // readMatch(), and that method should be preferred in most cases.
-export async function readMatchMetadata(replayId : string)
+export async function readMatchMetadata(matchId : string)
     : Promise<MatchProfile[]> {
   const records = await MatchProfileModel.findAll({ where: {
-    match_id: { [Sequelize.Op.eq]: replayId },
+    match_id: { [Sequelize.Op.eq]: matchId },
   }});
 
   return records;

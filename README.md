@@ -46,3 +46,6 @@ Start the development server.
 ```bash
 npm run dev
 ```
+
+Sanity check that the server is running:
+[http://localhost:3000/status](http://localhost:3000/status).

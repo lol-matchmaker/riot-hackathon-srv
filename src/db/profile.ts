@@ -27,7 +27,6 @@ export const ProfileModel = sequelize.define<ProfileInstance, Profile>(
   },
   summoner_id: {
     type: Sequelize.STRING,
-    primaryKey: true,
   },
   summoner_name: Sequelize.STRING,
   stats: Sequelize.JSON,
