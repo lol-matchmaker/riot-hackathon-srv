@@ -74,7 +74,6 @@ export async function findMatch(matchId: string): Promise<FullMatchInfo> {
 
 export async function findMatchesForProfile(accountId: string):
     Promise<Match[]> {
-
   const cachedMatchProfiles = await readProfileMatchMetadata(accountId);
   if (cachedMatchProfiles.length !== 0) {
     const matchIds = cachedMatchProfiles.map(

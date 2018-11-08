@@ -184,6 +184,21 @@ function matchProfilesFromRiotMatchJson(match_jsonObject: any, match: Match):
 
     const teamName = teamNameFromRiotId(participant.teamId);
 
+    // get cs deltas
+    var csD10 = 0;
+    var csD20 = 0;
+    var csD30 = 0;
+    try {csD10 = participant.timeline.csDiffPerMinDeltas['0-10'];} catch (error) {
+        csD10 = 0;
+    }
+    try {csD20 = participant.timeline.csDiffPerMinDeltas['10-20'];} catch (error) {
+        csD20 = 0;
+    }
+    try {csD30 = participant.timeline.csDiffPerMinDeltas['20-30'];} catch (error) {
+        csD30 = 0;
+    }
+
+
     const matchProfile: MatchProfile = {
       account_id: playerInfo.currentAccountId.toString(),
       match_id: match.id,
@@ -201,9 +216,9 @@ function matchProfilesFromRiotMatchJson(match_jsonObject: any, match: Match):
         deaths: participant.stats.deaths,
         assists: participant.stats.assists,
         duration: match_jsonObject.gameDuration,
-        cs_difference_0_10: participant.timeline.csDiffPerMinDeltas['0-10'],
-        cs_difference_10_20: participant.timeline.csDiffPerMinDeltas['10-20'],
-        cs_difference_20_30: participant.timeline.csDiffPerMinDeltas['20-30']
+        cs_difference_0_10: csD10,
+        cs_difference_10_20: csD20,
+        cs_difference_20_30: csD30
       },
     };
     matchProfiles.push(matchProfile);

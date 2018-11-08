@@ -19,7 +19,7 @@
     "noImplicitUseStrict": false,
     "noLib": false,
     "noResolve": false,
-    "noUnusedLocals": true,
+    "noUnusedLocals": false,
     "noUnusedParameters": false,
     "outDir": "js/",
     "removeComments": true,

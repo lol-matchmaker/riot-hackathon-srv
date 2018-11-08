@@ -4,7 +4,6 @@ import { findMatchesForProfile, findMatch } from '../fetcher/resolver';
 const matches = {
   byAccountId: async (ctx: Koa.Context, next: () => Promise<any>) => {
     await next();
-
     const accountId = ctx.params.id;
     const matches = await findMatchesForProfile(accountId);
     ctx.response.body = matches;
