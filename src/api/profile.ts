@@ -3,7 +3,7 @@ import Koa = require('koa');
 import { writeProfile } from '../db/profile';
 import { writeMatch } from '../db/match';
 import { writeMatchProfile } from '../db/match_profile';
-import { fetchAccountMatchList, fetchMatchById, fetchProfileByName } from './riot_fetcher';
+import { fetchAccountMatchList, fetchMatchById, fetchProfileByName } from '../fetcher/riot_fetcher';
 
 const profile = {
   new: async (ctx : Koa.Context, next : () => Promise<any>) => {
