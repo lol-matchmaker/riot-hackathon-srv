@@ -29,8 +29,22 @@ function calculateScore(players:any) {
 
             // Compare scores for classes
             for(var typeI in players[i]["classes"])  {
-
+                // for each class in player 1, compare vs all other classes
+                var player1Class: any = players[i]["classes"][typeI];
+                for(var typeT in players[t]["classes"]) {
+                    var player2Class: any = players[t]["classes"][typeT];
+                    curScore += rules["rules"]["compPenalty"][player1Class][player2Class];
+                }
             }
+
+            // compare score for rank difference
+            var rankDiff:any = players[i]["rank"] + players[t]["rank"];
+            // if rank is more than 13 diff just set to 13+
+            if(rankDiff >= 13) {
+                rankDiff = "13+";
+            }
+
+            curScore += rules["rules"]["rankDiffPenalty"][rankDiff];
         }
     }
 }
