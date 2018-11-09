@@ -105,12 +105,11 @@ export async function updatePlayerCompatibility(update_info: any, name: string) 
   await ProfileModel.findOne({
     where: {
        summoner_name: name
-    }
- }).then(function(res) {
-    ProfileModel.update(
-      {
-        stats: Object.assign(res, update_info)
-      },
+    },
+    raw: true,
+ }).then(res => {
+   let s = JSON.stringify(res)
+    ProfileModel.update(Object.assign(res, {stats: update_info}),
       { where: {
           summoner_name: name
         }
