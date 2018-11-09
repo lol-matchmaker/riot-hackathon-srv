@@ -37,8 +37,8 @@ const profile = {
   updatePreferences: async (ctx: Koa.Context, next: () => Promise<any>) => {
     await next();
 
-    const name = ctx.params.name
-    const profile = await updatePlayerPreferences(ctx.request.body, name);
+    const name:any = ctx.request.body
+    const profile = await updatePlayerPreferences(ctx.request.body, name["accountId"]);
     ctx.response.body = profile;
   },
   all: async (ctx: Koa.Context, next: () => Promise<any>) => {

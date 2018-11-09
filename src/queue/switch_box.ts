@@ -6,6 +6,7 @@ import { WsApp } from './ws_app';
 import { QueueClientDelegate, QueueClient, QueueClientState, MatchPlayerData } from './queue_client';
 import { Profile } from '../db/profile';
 import { MatchedMessagePlayerRole, MatchedMessagePlayerInfo } from './ws_messages';
+import { findMatch } from "../matching-service/finder"
 
 /** Used by the match-maker to report matches to the SwitchBox. */
 export interface MatchResult {
@@ -107,7 +108,7 @@ export class SwitchBox implements WsApp, QueueClientDelegate {
   }
 
   /** The clients queued for match-making changed. Try to find a match. */
-  private handleQueueChange(client: QueueClient, added: boolean) {
+  private async handleQueueChange(client: QueueClient, added: boolean) {
     // Index the queued clients.
     const profiles: Profile[] = [];
     const clientsByAccountId = new Map<string, QueueClient>();
@@ -120,10 +121,17 @@ export class SwitchBox implements WsApp, QueueClientDelegate {
     }
 
     // Try to find a match.
-    let matchResult: MatchResult | null = null;
+    let matchResult: MatchResult | null = {};
     if (g_debugMatchLimit === null) {
       // Real matcher goes here. Takes profiles and returns MatchResult.
-      
+    //   console.log("XXX");
+    //   console.log(profiles[0]);
+      var temp:any = await findMatch(profiles);
+      for(var i in temp) {
+        matchResult[temp[i]["account_id"]] = temp["role"];
+      }
+    //   console.log("YYY")
+    //   console.log(matchResult);
     } else {
       // Debugging matcher that takes the first players who show up.
       if (profiles.length >= g_debugMatchLimit) {

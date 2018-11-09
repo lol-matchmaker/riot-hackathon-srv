@@ -1,5 +1,5 @@
 import crypto = require('crypto');
-
+const request = require("request");
 import WebSocket = require('ws');
 
 import { Profile } from "../db/profile";
@@ -8,6 +8,7 @@ import { ChallengeMessage, WsMessage, WelcomeMessage, QueuedMessage,
     from './ws_messages';
 import { findProfileByAccountId } from '../fetcher/resolver';
 import { fetchSummonerVerification } from '../fetcher/riot_fetcher';
+import { updatePlayerPreferences } from "../db/profile";
 
 export type QueueClientState =
     'new' | 'challenged' | 'ready' | 'queued' | 'matched' | 'closed';
@@ -171,7 +172,7 @@ export class QueueClient {
     console.error(error);
   }
 
-  private onWsMessage(event: MessageEvent): void {
+  private async onWsMessage(event: MessageEvent) {
     console.log('Client WS message');
 
     const message: WsMessage = JSON.parse(event.data);
@@ -183,6 +184,15 @@ export class QueueClient {
         this.authenticate(accountId, summonerId);  // Promise ignored.
         break;
       case 'plsqueue':
+        var messageData:any = message.data;
+        // updatePlayerPreferences(messageData, messageData["accountId"]);
+        var url = "http://localhost:3000/profiles/update/preferences/" + messageData["accountId"];
+        var header = {
+            json: messageData
+        }
+        await request.post(url, header, (err:any, res:any, body:any) => {
+            console.log(body);
+        });
         if (this.lastState !== 'ready') {
           // TODO(pwnall): Close socket?
           return;

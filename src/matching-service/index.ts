@@ -3,7 +3,8 @@ class matchFinder {
     public curHS:any = 0;
     public minScore = 70;
     constructor() {
-
+        this.curHS = 0;
+        this.minScore = 0;
     }
     findMatch(players:any, startIndex:any) {
         var curPlayers:any = [], curPlayersIndex:any = [0];
@@ -85,13 +86,18 @@ function calculateScore(players:any) {
         if(potentialRoles.indexOf(players[i]["primaryRole"]) >= 0) {
             potentialRoles.splice(potentialRoles.indexOf(players[i]["primaryRole"]), 1 );
         }
-        else if(potentialRoles.indexOf(players[i]["secondaryRole"]) >= 0) {
-            potentialRoles.splice(potentialRoles.indexOf(players[i]["secondaryRole"]), 1);
-            curScore = +curScore - 10;
-        }
+        // else if(potentialRoles.indexOf(players[i]["secondaryRole"]) >= 0) {
+        //     potentialRoles.splice(potentialRoles.indexOf(players[i]["secondaryRole"]), 1);
+        //     curScore = +curScore - 10;
+        // }
         else {
             potentialRoles.splice(0, 1);
-            curScore = +curScore - 30;
+            // if(players[i]["primaryRole"] == "Fill" || players[i]["secondaryRole"] == "Fill") {
+
+            // }
+            // else {
+                curScore = +curScore - 30;
+            // }
         }
         // Add to aggro counter
         numbAggro += +players[i]["aggro"];

@@ -2,6 +2,16 @@ const classAnalyzer = require("../tag-generator/classAnalyzer") ;
 const matchFinder = require("./index");
 import request = require('request');
 
+// {
+//     "accountId": 51233797,
+//     "roles": [
+//         "Fighter",
+//         "Mage"
+//     ],
+//     "intensity": 0,
+//     "position": "Middle",
+//     "language": "ady"
+// }
 export async function findMatch(players:any) {
     var promises:any = [];
     for(var i in players) {
@@ -11,15 +21,19 @@ export async function findMatch(players:any) {
     await Promise.all(promises).then((data:any)=> {
         var newPlayerQueue = [];
         for(var i in data) {
+            var role:any = players[i]["stats"]["position"];
+            if(role == "Bottom/ADC") {
+                role = "Bottom";
+            }
             newPlayerQueue.push({
-                classes: ["Tank", "Mage"],
+                classes: players[i]["stats"]["roles"],
                 name: players[i]["summoner_name"],
                 accountId: players[i]["account_id"],
                 rank: rankToNumber(players[i]["solo"]),
                 aggro: 0,
-                seriousness: 50,
-                primaryRole: "Middle",
-                secondaryRole: "Bottom",
+                seriousness: players[i]["stats"]["intensity"],
+                primaryRole: role,
+                secondaryRole: "None",
                 otherPlayers: players[i]["player_compatibility"]
             });
         }
@@ -76,6 +90,7 @@ async function addPlayer(accountID:any) {
             if(err) {
                 console.log(err);
             }
+            console.log(url);
             var playersGames = JSON.parse(body);
             
             await cA.addAllGames(playersGames);
@@ -160,4 +175,4 @@ var temp = [
     }
    ]
 
-findMatch(temp);
+// findMatch(temp);
