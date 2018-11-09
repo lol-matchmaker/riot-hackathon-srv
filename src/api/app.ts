@@ -1,6 +1,7 @@
 import path = require('path');
 
 import Koa = require('koa');
+import koaBodyParser = require('koa-bodyparser');
 import koaCors = require('@koa/cors');
 import koaJson = require('koa-json');
 import KoaRouter = require('koa-router');
@@ -47,4 +48,5 @@ app.use(koaCors());
 app.use(koaJson({ pretty: false, param: 'pretty_json' }));
 app.use(koaStatic(path.join(path.dirname(__dirname), 'static'),
         {index: 'index.html'}));
+app.use(koaBodyParser());
 app.use(router.routes()).use(router.allowedMethods());
