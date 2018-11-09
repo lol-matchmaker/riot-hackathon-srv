@@ -30,7 +30,7 @@ router.get('/matches/details/:id', matches.byMatchId);
 router.get('/profiles/:id', profiles.byAccountId);
 // GET /profile_by_name/(summoner_name)
 router.get('/profile_by_name/:name', profiles.byName);
-// POST /profiles/update
+// POST /profiles/update/(summonerName)
 router.post('/profiles/update', profiles.updateCompatibility);
 
 // GET /verification/(account_id)
