@@ -1,6 +1,12 @@
 import v8 = require('v8');
 
 import Koa = require('koa');
+import { SwitchBox } from '../queue/switch_box';
+
+let g_switchBox : SwitchBox | null = null;
+export function setAppStatusSwitchBox(switchBox: SwitchBox) {
+  g_switchBox = switchBox;
+}
 
 const status = {
   index: async (ctx : Koa.Context, next : () => Promise<any>) => {
@@ -17,12 +23,15 @@ const status = {
     };
   },
 
-  pool: async (ctx : Koa.Context, next : () => Promise<any>) => {
+  queue: async (ctx : Koa.Context, next : () => Promise<any>) => {
     await next();
 
-    ctx.response.body = {
-      ohai: 0,
-    };
+    if (!g_switchBox) {
+      ctx.response.body = {};
+      return;
+    }
+
+    ctx.response.body = g_switchBox.stats();
   },
 };
 

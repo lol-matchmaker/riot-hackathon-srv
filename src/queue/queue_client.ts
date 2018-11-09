@@ -3,12 +3,12 @@ import crypto = require('crypto');
 import WebSocket = require('ws');
 
 import { Profile } from "../db/profile";
-import { ChallengeMessage, WsMessage, WelcomeMessage, QueuedMessage, DequeuedMessage } from './ws_messages';
+import { ChallengeMessage, WsMessage, WelcomeMessage, QueuedMessage, DequeuedMessage, MatchedMessage } from './ws_messages';
 import { findProfileByAccountId } from '../fetcher/resolver';
 import { fetchSummonerVerification } from '../fetcher/riot_fetcher';
 
 export type QueueClientState =
-    'new' | 'challenged' | 'ready' | 'queued' | 'closed';
+    'new' | 'challenged' | 'ready' | 'queued' | 'matched' | 'closed';
 
 export interface QueueClientDelegate {
   onClientStateChange(client: QueueClient, state: QueueClientState): void;
@@ -80,6 +80,19 @@ export class QueueClient {
     this.setState('ready');
   }
 
+  /** Notifies the client that they were added to a match. */
+  public wasMatched(players: Profile[]): void {
+    const message : MatchedMessage = { type: 'matched', players: [] };
+    for (const player of players) {
+      message.players.push({
+        account_id: player.account_id,
+        summoner_id: player.summoner_id,
+      });
+    }
+    this.socket.send(JSON.stringify(message));
+    this.setState('matched');
+  }
+
   /** Creates a challenge token and sends it to the client app. */
   private async challenge(): Promise<void> {
     this.lastProfile = null;
@@ -141,7 +154,7 @@ export class QueueClient {
 
   private onWsClose(_: CloseEvent): void {
     console.log('Client WS closed');
-    this.lastState = 'closed';
+    this.setState('closed');
   }
 
   private onWsError(error: Error): void {

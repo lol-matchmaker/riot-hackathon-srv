@@ -40,6 +40,10 @@ export interface DequeuedMessage {
 /** Server -> Client: Player is in match. */
 export interface MatchedMessage {
   type: 'matched';
+  players: Array<{
+    account_id: string,
+    summoner_id: string,
+  }>;
 }
 
 /** All messages. */

@@ -16,7 +16,7 @@ var bodyParser = require('koa-bodyparser');
 
 const router = new KoaRouter();
 
-router.get('/status/pool', status.pool);
+router.get('/status/queue', status.queue);
 router.get('/status/memory', status.memory);
 router.get('/status', status.index);
 
