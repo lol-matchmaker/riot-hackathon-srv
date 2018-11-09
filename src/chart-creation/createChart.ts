@@ -74,13 +74,15 @@ var tData = [
     type: 'scatterpolar',
     r: z,
     theta: ['Fighter','Mage','Tank', 'Assassin', 'Marksman', 'Support'],
-    fill: 'toself'
+    fill: 'toself',
+    name: "Games Played"
   },
   {
     type: 'scatterpolar',
     r: t,
     theta: ['Fighter','Mage','Tank', 'Assassin', 'Marksman', 'Support'],
-    fill: 'toself'
+    fill: 'toself',
+    name: "Percent Played"
   }]
 
 // var tData = [{
