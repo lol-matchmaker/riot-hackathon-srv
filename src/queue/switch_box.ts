@@ -18,10 +18,10 @@ export interface MatchResult {
  * The debugging matcher is a pure greedy that matches the first people who
  * show up in the queue.
  */
-const g_debugMatchLimit: number | null = 2;
+const g_debugMatchLimit: number | null = 5;
 /** Pre-assigned lanes for the debugging matcher. */
 const kDebugLanes: MatchedMessagePlayerRole[] =
-    ['MIDDLE', 'SUPPORT', 'BOTTOM', 'JUNGLE', 'TOP'];
+    ['MIDDLE', 'UTILITY', 'BOTTOM', 'JUNGLE', 'TOP'];
 
 /** Manages all of the server's WebSocket clients. */
 export class SwitchBox implements WsApp, QueueClientDelegate {
@@ -164,6 +164,8 @@ export class SwitchBox implements WsApp, QueueClientDelegate {
       const profile = matchedClient.profile() as Profile;
       matchData.push({ profile, role });
     }
+
+    matchData.reverse();
 
     for (const matchedClient of matchClients) {
       this.queued.delete(matchedClient);
