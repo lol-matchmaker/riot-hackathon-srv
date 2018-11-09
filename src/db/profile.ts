@@ -5,6 +5,9 @@ import { sequelize } from './connection';
 interface PlayerStats {
 
 }
+interface PlayerProfile {
+
+}
 
 // Sequelize service object.
 export interface Profile {
@@ -14,6 +17,7 @@ export interface Profile {
   solo: string,
   flex: string,
   stats: PlayerStats,
+  player_compatibility: PlayerProfile
 }
 
 // Sequelize service object.
@@ -34,6 +38,7 @@ export const ProfileModel = sequelize.define<ProfileInstance, Profile>(
   solo: Sequelize.STRING,
   flex: Sequelize.STRING,
   stats: Sequelize.JSON,
+  player_compatibility: Sequelize.JSON
 }, {
   createdAt: false,
   updatedAt: 'updated_at',

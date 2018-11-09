@@ -24,6 +24,7 @@ function profileFromRiotJson(riotAccountJson: any): Profile {
     solo: riotAccountJson.solo,
     flex: riotAccountJson.flex,
     stats: {},
+    player_compatibility: {}
   };
   return profile;
 }
