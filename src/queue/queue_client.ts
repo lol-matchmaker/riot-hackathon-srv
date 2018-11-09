@@ -3,7 +3,9 @@ import crypto = require('crypto');
 import WebSocket = require('ws');
 
 import { Profile } from "../db/profile";
-import { ChallengeMessage, WsMessage, WelcomeMessage, QueuedMessage, DequeuedMessage, MatchedMessage } from './ws_messages';
+import { ChallengeMessage, WsMessage, WelcomeMessage, QueuedMessage,
+         DequeuedMessage, MatchedMessage, MatchedMessagePlayerRole }
+    from './ws_messages';
 import { findProfileByAccountId } from '../fetcher/resolver';
 import { fetchSummonerVerification } from '../fetcher/riot_fetcher';
 
@@ -14,6 +16,11 @@ export interface QueueClientDelegate {
   onClientStateChange(client: QueueClient, state: QueueClientState): void;
   onClientQueueRequest(client: QueueClient): void;
   onClientQueueCancel(client: QueueClient): void;
+}
+
+export interface MatchPlayerData {
+  profile: Profile,
+  role: MatchedMessagePlayerRole,
 }
 
 /** Tracks a connection to an app client. */
@@ -81,12 +88,14 @@ export class QueueClient {
   }
 
   /** Notifies the client that they were added to a match. */
-  public wasMatched(players: Profile[]): void {
+  public wasMatched(players: MatchPlayerData[]): void {
     const message : MatchedMessage = { type: 'matched', players: [] };
     for (const player of players) {
       message.players.push({
-        account_id: player.account_id,
-        summoner_id: player.summoner_id,
+        account_id: player.profile.account_id,
+        summoner_id: player.profile.summoner_id,
+        summoner_name: player.profile.summoner_name,
+        role: player.role,
       });
     }
     this.socket.send(JSON.stringify(message));

@@ -32,9 +32,9 @@ router.get('/profiles/:id', profiles.byAccountId);
 // GET /profile_by_name/(summoner_name)
 router.get('/profile_by_name/:name', profiles.byName);
 // POST /profiles/update/(summonerName)
-router.post('/profiles/update/compatibility', profiles.updateCompatibility);
+router.post('/profiles/update/compatibility/:id', profiles.updateCompatibility);
 // POST /profiles/update/(summonerName)
-router.post('/profiles/update/preferences', profiles.updatePreferences);
+router.post('/profiles/update/preferences/:id', profiles.updatePreferences);
 
 // GET /verification/(account_id)
 router.get('/verification/account/:id', verification.byAccountId);
