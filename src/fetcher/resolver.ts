@@ -1,4 +1,5 @@
 import { Profile, readProfile, writeProfile } from '../db/profile';
+import { ProfileStats, readProfilesStats, writeProfileStats } from '../db/profile_stats';
 import { fetchProfileByAccountId, fetchAccountMatchList, fetchMatchById, FullMatchInfo } from './riot_fetcher';
 import { readProfileMatchMetadata, writeMatchProfile, readMatchMetadata } from '../db/match_profile';
 import { readMatches, writeMatch, Match, readMatch } from '../db/match';
