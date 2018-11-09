@@ -17,7 +17,7 @@ export interface Profile {
   summoner_name: string,
   solo: string,
   flex: string,
-  stats: PlayerStats,
+  stats: JSON,
   player_compatibility: PlayerProfile
 }
 
@@ -118,21 +118,16 @@ export async function updateStatistics(update_info: any, summoner_account_id: st
  });
 }
 
-export async function updatePlayerPreferences(update_info: any, name: string) {
-    await ProfileModel.findOne({
-      where: {
-         summoner_name: name
-      }
-   }).then(function(res) {
+export async function updatePlayerPreferences(update_info: any, accountId: string) {
+    console.log(accountId);
       ProfileModel.update(
         {
-          stats: Object.assign(res, update_info)
+          stats: update_info
         },
         { where: {
-            summoner_name: name
+            account_id: accountId.toString()
           }
-      })
-   });
+      });
   }
 
 export async function getAllPlayers() {
