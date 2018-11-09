@@ -3,7 +3,8 @@ import http = require('http');
 import WebSocket = require('ws');
 
 import { WsApp } from './ws_app';
-import { QueueClientDelegate, QueueClient, QueueClientState, MatchPlayerData } from './queue_client';
+import { QueueClientDelegate, QueueClient, QueueClientState, MatchPlayerData }
+    from './queue_client';
 import { Profile } from '../db/profile';
 import { MatchedMessagePlayerRole, MatchedMessagePlayerInfo } from './ws_messages';
 import { findMatch } from "../matching-service/finder"

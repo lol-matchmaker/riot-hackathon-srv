@@ -17,7 +17,7 @@ export interface Profile {
   summoner_name: string,
   solo: string,
   flex: string,
-  stats: JSON,
+  stats: any,
   player_compatibility: PlayerProfile
 }
 
@@ -147,14 +147,14 @@ export async function updateCompatibility(summoner_account_id: string, summonerN
     initVal = s[summonerName_toChange]
    }
    catch {}
-   
+
    if (add) {
      initVal += 1
    }
    else {
      initVal -= 1
    }
-   
+
    let update_info = Object.assign(s, {summonerName_toChange: initVal})
     ProfileModel.update(Object.assign(res, {player_compatibility: update_info}),
       { where: {
