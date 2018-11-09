@@ -1,6 +1,7 @@
 import * as Sequelize from 'sequelize';
 
 import { sequelize } from './connection';
+import request = require('request');
 
 interface PlayerStats {
 
@@ -98,4 +99,15 @@ export async function readProfilesPaged(pageStart: string, pageSize: number):
 //      map((record) => record.data);
 
   return { data: data, nextPageStart: nextPageStart };
+}
+
+export async function updatePlayerCompatibility(update_info: any) {
+  ProfileModel.update(
+    {
+      stats: update_info
+    },
+    { where: {
+        summoner_name: 'OXStormthunder'
+      }
+  })
 }

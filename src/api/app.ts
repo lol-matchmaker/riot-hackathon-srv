@@ -11,6 +11,8 @@ import profiles from './profiles';
 import status from './status';
 import verification from './verification';
 
+var bodyParser = require('koa-bodyparser');
+
 const router = new KoaRouter();
 
 router.get('/status/pool', status.pool);
@@ -27,6 +29,10 @@ router.get('/matches/details/:id', matches.byMatchId);
 router.get('/profiles/:id', profiles.byAccountId);
 // GET /profile_by_name/(summoner_name)
 router.get('/profile_by_name/:name', profiles.byName);
+// POST /profiles/update
+router.post('/profiles/update', function() {
+
+})
 
 // GET /verification/(account_id)
 router.get('/verification/account/:id', verification.byAccountId);
