@@ -189,15 +189,9 @@ function matchProfilesFromRiotMatchJson(match_jsonObject: any, match: Match):
     var csD10 = 0;
     var csD20 = 0;
     var csD30 = 0;
-    try {csD10 = participant.timeline.csDiffPerMinDeltas['0-10'];} catch (error) {
-        csD10 = 0;
-    }
-    try {csD20 = participant.timeline.csDiffPerMinDeltas['10-20'];} catch (error) {
-        csD20 = 0;
-    }
-    try {csD30 = participant.timeline.csDiffPerMinDeltas['20-30'];} catch (error) {
-        csD30 = 0;
-    }
+    try {csD10 = participant.timeline.csDiffPerMinDeltas['0-10'];} catch (error) {}
+    try {csD20 = participant.timeline.csDiffPerMinDeltas['10-20'];} catch (error) {}
+    try {csD30 = participant.timeline.csDiffPerMinDeltas['20-30'];} catch (error) {}
 
 
     const matchProfile: MatchProfile = {

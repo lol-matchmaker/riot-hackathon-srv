@@ -1,0 +1,47 @@
+{
+    "47143896": {
+        "games_played": 100,
+        "games_fighter": {
+            "gamesPlayed": 22,
+            "wins": 15,
+            "losses": 7,
+            "winrate": "0.68",
+            "PercentPlayed": 0.22
+        },
+        "games_mage": {
+            "gamesPlayed": 8,
+            "wins": 2,
+            "losses": 6,
+            "winrate": "0.25",
+            "PercentPlayed": 0.08
+        },
+        "games_tank": {
+            "gamesPlayed": 24,
+            "wins": 18,
+            "losses": 6,
+            "winrate": "0.75",
+            "PercentPlayed": 0.24
+        },
+        "games_marksman": {
+            "gamesPlayed": 68,
+            "wins": 37,
+            "losses": 31,
+            "winrate": "0.54",
+            "PercentPlayed": 0.68
+        },
+        "games_assassin": {
+            "gamesPlayed": 16,
+            "wins": 9,
+            "losses": 7,
+            "winrate": "0.56",
+            "PercentPlayed": 0.16
+        },
+        "games_support": {
+            "gamesPlayed": 33,
+            "wins": 16,
+            "losses": 17,
+            "winrate": "0.48",
+            "PercentPlayed": 0.33
+        }
+    }
+}

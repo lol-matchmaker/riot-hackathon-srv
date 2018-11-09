@@ -105,8 +105,8 @@ export class SwitchBox implements WsApp, QueueClientDelegate {
 
     // Try to find a match.
     let match: Profile[] | null = null;
-    if (profiles.length >= 2) {
-      match = [profiles[0], profiles[1]];
+    if (profiles.length >= 1) {
+      match = [profiles[0]];
     }
 
     // Make the match happen.

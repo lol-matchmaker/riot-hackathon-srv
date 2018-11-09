@@ -2,13 +2,15 @@ const rAPI = require("./riotAPI");
 var RiotAPI = new rAPI();
 
 class gameAnalyzer {
-    public classes: any = {};
+    public classes: any;
     public averageGameStats: any = {};
     public champions: any;
     public tags:any = [];
-    constructor(champJSON: JSON) {
+    public accountId:any;
+    public gamesPlayed = 0;
+    constructor(champJSON: JSON, accountID:any) {
         this.champions = champJSON;
-
+        this.accountId = accountID;
         // generate average game stats dict
         this.averageGameStats = {
             "gamesPlayed": 0,
@@ -18,10 +20,20 @@ class gameAnalyzer {
             "assists": 0,
             "gameLength": 0,
             "csDiff10": 0,
+            "aggro": false
+        }
+        this.classes = {
+            Marksman: { gamesPlayed: 0, wins: 0, losses: 0, winrate: '0' },
+            Assassin: { gamesPlayed: 0, wins: 0, losses: 0, winrate: '0' },
+            Mage: { gamesPlayed: 0, wins: 0, losses: 0, winrate: '0' },
+            Tank: { gamesPlayed: 0, wins: 0, losses: 0, winrate: '0' },
+            Fighter: { gamesPlayed: 0, wins: 0, losses: 0, winrate: '0' },
+            Support: { gamesPlayed: 0, wins: 0, losses: 0, winrate: '0' }
         }
     }
 
     async addGame(game: any) {
+        this.gamesPlayed += 1;
         // Get champion Tags from game
         var championId = game["champion"];
         var currentChampion;
@@ -48,6 +60,10 @@ class gameAnalyzer {
         // console.log(gameData);
         this.addClass(currentChampion, gameData, participantId);
         this.addStats(gameData, participantId);
+    }
+
+    addAggro(participantId:any) {
+        
     }
 
     addStats(gameData: any, participantId: any) {
