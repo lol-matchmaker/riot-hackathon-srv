@@ -17,6 +17,39 @@ export interface WelcomeMessage {
   type: 'ready';
 }
 
+/** Client -> Server: Player is ready to get matched. Do magic. */
+export interface RequestQueueMessage {
+  type: 'plsqueue';
+}
+
+/** Server -> Client: Player is in queue. Ask player to wait. */
+export interface QueuedMessage {
+  type: 'queued';
+}
+
+/** Client -> Server: Player is ready to get matched. Do magic. */
+export interface CancelQueueMessage {
+  type: 'noqueue';
+}
+
+/** Server -> Client: Player is no longer in the queue for some reason. */
+export interface DequeuedMessage {
+  type: 'dequeued';
+}
+
+/** Per-player information in the Server -> Client matchmaking packet. */
+export interface MatchedMessagePlayerInfo {
+  account_id: string;
+  summoner_id: string;
+}
+
+/** Server -> Client: Player is in match. */
+export interface MatchedMessage {
+  type: 'matched';
+  players: MatchedMessagePlayerInfo[];
+}
+
 /** All messages. */
 export type WsMessage =
-    ChallengeMessage | AuthMessage | WelcomeMessage;
+    ChallengeMessage | AuthMessage | WelcomeMessage | RequestQueueMessage |
+    QueuedMessage | CancelQueueMessage | DequeuedMessage | MatchedMessage;

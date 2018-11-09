@@ -1,8 +1,12 @@
 import * as Sequelize from 'sequelize';
 
 import { sequelize } from './connection';
+import request = require('request');
 
 interface PlayerStats {
+
+}
+interface PlayerProfile {
 
 }
 
@@ -14,6 +18,7 @@ export interface Profile {
   solo: string,
   flex: string,
   stats: PlayerStats,
+  player_compatibility: PlayerProfile
 }
 
 // Sequelize service object.
@@ -34,6 +39,7 @@ export const ProfileModel = sequelize.define<ProfileInstance, Profile>(
   solo: Sequelize.STRING,
   flex: Sequelize.STRING,
   stats: Sequelize.JSON,
+  player_compatibility: Sequelize.JSON
 }, {
   createdAt: false,
   updatedAt: 'updated_at',
@@ -93,4 +99,21 @@ export async function readProfilesPaged(pageStart: string, pageSize: number):
 //      map((record) => record.data);
 
   return { data: data, nextPageStart: nextPageStart };
+}
+
+export async function updatePlayerCompatibility(update_info: any, name: string) {
+  await ProfileModel.findOne({
+    where: {
+       summoner_name: name
+    }
+ }).then(function(res) {
+    ProfileModel.update(
+      {
+        stats: Object.assign(res, update_info)
+      },
+      { where: {
+          summoner_name: name
+        }
+    })
+ });
 }

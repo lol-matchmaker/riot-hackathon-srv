@@ -3,11 +3,14 @@ import net = require('net');
 
 import Koa = require('koa');
 import WebSocket = require('ws');
+import { WsApp } from './ws_app';
 
 /** Multiplexes a REST API server and a WebSockets server on the same socket. */
 export class Multiplexer {
   /** The REST API server. */
   public readonly app: Koa;
+  /** The WebSockets API server. */
+  public readonly wsApp: WsApp;
   /** The IP address of the HTTP API server. */
   private address: net.AddressInfo | null;
   /** The HTTP server multiplexing the REST and WebSocket server. */
@@ -17,9 +20,10 @@ export class Multiplexer {
   /** The WebSocket server. */
   public wsServer: WebSocket.Server | null;
 
-  public constructor(app: Koa, port: number) {
+  public constructor(app: Koa, wsApp: WsApp, port: number) {
     this.address = null;
     this.app = app;
+    this.wsApp = wsApp;
     this.httpServer = http.createServer(app.callback());
     this.port = port;
     this.wsServer = null;
@@ -104,7 +108,6 @@ export class Multiplexer {
   /** Called when a new WebSocket connects. */
   private onWsConnection(socket: WebSocket,
                          request: http.IncomingMessage): void {
-    console.log(request);
-    socket.send(JSON.stringify({type: 'welcome'}));
+    this.wsApp.onWsConnection(socket, request);
   }
 }

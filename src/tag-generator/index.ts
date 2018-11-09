@@ -1,4 +1,4 @@
-const request = require('request');
+import request = require('request');
 const champions = require('./static-data/champions.json')["data"];
 const classAnalyzer = require("./classAnalyzer") ;
 const fs = require('fs');
