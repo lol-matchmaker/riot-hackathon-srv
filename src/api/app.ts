@@ -9,6 +9,7 @@ import koaStatic = require('koa-static');
 import matches from './matches';
 import profiles from './profiles';
 import status from './status';
+import verification from './verification';
 
 const router = new KoaRouter();
 
@@ -26,6 +27,11 @@ router.get('/matches/details/:id', matches.byMatchId);
 router.get('/profiles/:id', profiles.byAccountId);
 // GET /profile_by_name/(summoner_name)
 router.get('/profile_by_name/:name', profiles.byName);
+
+// GET /verification/(account_id)
+router.get('/verification/account/:id', verification.byAccountId);
+// GET /verification/(summoner_id)
+router.get('/verification/summoner/:id', verification.bySummonerId);
 
 // router.get('/match', match.id)
 
