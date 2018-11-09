@@ -101,7 +101,7 @@ export async function readProfilesPaged(pageStart: string, pageSize: number):
   return { data: data, nextPageStart: nextPageStart };
 }
 
-export async function updatePlayerCompatibility(update_info: any, name: string) {
+export async function updateStatistics(update_info: any, name: string) {
   await ProfileModel.findOne({
     where: {
        summoner_name: name
@@ -115,4 +115,34 @@ export async function updatePlayerCompatibility(update_info: any, name: string) 
         }
     })
  });
+}
+
+export async function updateCompatibility(summonerName: string, summonerName_toChange: string, add: boolean) {
+  ProfileModel.findOne({
+    where: {
+       summoner_name: summonerName
+    },
+    raw: true,
+  }).then(res => {
+   let s = res!.stats as any
+   let initVal = 0
+   try {
+    initVal = s[summonerName_toChange]
+   }
+   catch {}
+   
+   if (add) {
+     initVal += 1
+   }
+   else {
+     initVal -= 1
+   }
+   
+   let update_info = Object.assign(s, {summonerName_toChange: initVal})
+    ProfileModel.update(Object.assign(res, {stats: update_info}),
+      { where: {
+          summoner_name: summonerName
+        }
+    })
+  });
 }
