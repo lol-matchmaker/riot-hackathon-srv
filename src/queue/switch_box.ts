@@ -35,9 +35,14 @@ export class SwitchBox implements WsApp, QueueClientDelegate {
       case 'challenged':
         this.limbo.add(client);
         break;
-      case 'authenticated':
+      case 'ready':
         this.limbo.delete(client);
         this.ready.add(client);
+        break;
+      case 'queued':
+        if (!this.queued.has(client)) {
+          throw new Error('Client was not supposed to be queued');
+        }
         break;
       case 'closed':
         for (const set of this.allQueues) {
@@ -47,5 +52,23 @@ export class SwitchBox implements WsApp, QueueClientDelegate {
       default:
         throw new Error(`Unsupported client state ${state}`);
     }
+  }
+
+  public onClientQueueRequest(client: QueueClient): void {
+    if (!this.ready.delete(client)) {
+      throw new Error("Client was not ready to be queued");
+    }
+    this.queued.add(client);
+
+    client.wasQueued();
+  }
+
+  public onClientQueueCancel(client: QueueClient): void {
+    if (!this.queued.delete(client)) {
+      throw new Error("Client was not queued");
+    }
+    this.ready.add(client);
+
+    client.wasDequeued();
   }
 }

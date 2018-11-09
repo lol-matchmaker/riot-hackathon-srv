@@ -3,15 +3,17 @@ import crypto = require('crypto');
 import WebSocket = require('ws');
 
 import { Profile } from "../db/profile";
-import { ChallengeMessage, WsMessage, WelcomeMessage } from './ws_messages';
+import { ChallengeMessage, WsMessage, WelcomeMessage, QueuedMessage, DequeuedMessage } from './ws_messages';
 import { findProfileByAccountId } from '../fetcher/resolver';
 import { fetchSummonerVerification } from '../fetcher/riot_fetcher';
 
 export type QueueClientState =
-    'new' | 'challenged' | 'authenticated' | 'closed';
+    'new' | 'challenged' | 'ready' | 'queued' | 'closed';
 
 export interface QueueClientDelegate {
   onClientStateChange(client: QueueClient, state: QueueClientState): void;
+  onClientQueueRequest(client: QueueClient): void;
+  onClientQueueCancel(client: QueueClient): void;
 }
 
 /** Tracks a connection to an app client. */
@@ -64,6 +66,20 @@ export class QueueClient {
   /** Last reported state. */
   public state(): QueueClientState { return this.lastState; }
 
+  /** Notifies the client they were added to the match-making queue. */
+  public wasQueued(): void {
+    const message : QueuedMessage = { type: 'queued' };
+    this.socket.send(JSON.stringify(message));
+    this.setState('queued');
+  }
+
+  /** Notifies the client they were removed from the match-making queue. */
+  public wasDequeued(): void {
+    const message : DequeuedMessage = { type: 'dequeued' };
+    this.socket.send(JSON.stringify(message));
+    this.setState('ready');
+  }
+
   /** Creates a challenge token and sends it to the client app. */
   private async challenge(): Promise<void> {
     this.lastProfile = null;
@@ -111,7 +127,7 @@ export class QueueClient {
 
     const message: WelcomeMessage = { type: 'ready' };
     this.socket.send(JSON.stringify(message));
-    this.setState('authenticated');
+    this.setState('ready');
   }
 
   private setState(state: QueueClientState): void {
@@ -143,6 +159,20 @@ export class QueueClient {
         const accountId = message.accountId;
         const summonerId = message.summonerId;
         this.authenticate(accountId, summonerId);  // Promise ignored.
+        break;
+      case 'plsqueue':
+        if (this.lastState !== 'ready') {
+          // TODO(pwnall): Close socket?
+          return;
+        }
+        this.delegate.onClientQueueRequest(this);
+        break;
+      case 'noqueue':
+        if (this.lastState !== 'queued') {
+          // TODO(pwnall): Close socket?
+          return;
+        }
+        this.delegate.onClientQueueCancel(this);
         break;
     }
   }
