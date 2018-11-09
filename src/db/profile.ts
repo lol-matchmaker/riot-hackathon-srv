@@ -101,17 +101,18 @@ export async function readProfilesPaged(pageStart: string, pageSize: number):
   return { data: data, nextPageStart: nextPageStart };
 }
 
-export async function updateStatistics(update_info: any, name: string) {
+// Update statistics
+export async function updateStatistics(update_info: any, summoner_account_id: string) {
   await ProfileModel.findOne({
     where: {
-       summoner_name: name
+      account_id: summoner_account_id
     },
     raw: true,
  }).then(res => {
    let s = JSON.stringify(res)
     ProfileModel.update(Object.assign(res, {stats: update_info}),
       { where: {
-          summoner_name: name
+        account_id: summoner_account_id
         }
     })
  });
@@ -124,7 +125,7 @@ export async function updateCompatibility(summoner_account_id: string, summonerN
     },
     raw: true,
   }).then(res => {
-   let s = res!.stats as any
+   let s = res!.player_compatibility as any
    let initVal = 0
    try {
     initVal = s[summonerName_toChange]
@@ -139,7 +140,7 @@ export async function updateCompatibility(summoner_account_id: string, summonerN
    }
    
    let update_info = Object.assign(s, {summonerName_toChange: initVal})
-    ProfileModel.update(Object.assign(res, {stats: update_info}),
+    ProfileModel.update(Object.assign(res, {player_compatibility: update_info}),
       { where: {
           account_id: summoner_account_id
         }
