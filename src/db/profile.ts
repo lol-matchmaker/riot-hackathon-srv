@@ -117,10 +117,10 @@ export async function updateStatistics(update_info: any, name: string) {
  });
 }
 
-export async function updateCompatibility(summonerName: string, summonerName_toChange: string, add: boolean) {
+export async function updateCompatibility(summoner_account_id: string, summonerName_toChange: string, add: boolean) {
   ProfileModel.findOne({
     where: {
-       summoner_name: summonerName
+       account_id: summoner_account_id
     },
     raw: true,
   }).then(res => {
@@ -141,7 +141,7 @@ export async function updateCompatibility(summonerName: string, summonerName_toC
    let update_info = Object.assign(s, {summonerName_toChange: initVal})
     ProfileModel.update(Object.assign(res, {stats: update_info}),
       { where: {
-          summoner_name: summonerName
+          account_id: summoner_account_id
         }
     })
   });
