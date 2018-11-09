@@ -2,7 +2,7 @@ import Koa = require('koa');
 
 import { findProfileByAccountId } from '../fetcher/resolver';
 import { fetchProfileByName } from '../fetcher/riot_fetcher';
-import { updatePlayerCompatibility } from '../db/profile'
+import { updatePlayerCompatibility, getAllPlayers } from '../db/profile'
 
 const profile = {
   byName: async (ctx: Koa.Context, next: () => Promise<any>) => {
@@ -25,6 +25,20 @@ const profile = {
 
     const name = ctx.params.name
     const profile = await updatePlayerCompatibility(ctx.request.body, name);
+    ctx.response.body = profile;
+  },
+  updatePreferences: async (ctx: Koa.Context, next: () => Promise<any>) => {
+    await next();
+
+    const name = ctx.params.name
+    const profile = await updatePlayerPreferences(ctx.request.body, name);
+    ctx.response.body = profile;
+  },
+  all: async (ctx: Koa.Context, next: () => Promise<any>) => {
+    await next();
+
+    const name = ctx.params.name
+    const profile = await getAllPlayers();
     ctx.response.body = profile;
   },
 };

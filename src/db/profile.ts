@@ -109,11 +109,33 @@ export async function updatePlayerCompatibility(update_info: any, name: string) 
  }).then(function(res) {
     ProfileModel.update(
       {
-        stats: Object.assign(res, update_info)
+        player_compatibility: Object.assign(res, update_info)
       },
       { where: {
           summoner_name: name
         }
     })
  });
+}
+
+export async function updatePlayerPreferences(update_info: any, name: string) {
+    await ProfileModel.findOne({
+      where: {
+         summoner_name: name
+      }
+   }).then(function(res) {
+      ProfileModel.update(
+        {
+          stats: Object.assign(res, update_info)
+        },
+        { where: {
+            summoner_name: name
+          }
+      })
+   });
+  }
+
+export async function getAllPlayers() {
+    var allData = await ProfileModel.findAll();
+    return allData;
 }

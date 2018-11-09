@@ -25,13 +25,16 @@ router.get('/matches/account/:id', matches.byAccountId);
 // GET /matches/details/(match_id)
 router.get('/matches/details/:id', matches.byMatchId);
 
-
+// GET /allprofiles
+router.get('/allprofiles', profiles.all);
 // GET /profiles/(account_id)
 router.get('/profiles/:id', profiles.byAccountId);
 // GET /profile_by_name/(summoner_name)
 router.get('/profile_by_name/:name', profiles.byName);
 // POST /profiles/update/(summonerName)
-router.post('/profiles/update', profiles.updateCompatibility);
+router.post('/profiles/update/compatibility', profiles.updateCompatibility);
+// POST /profiles/update/(summonerName)
+router.post('/profiles/update/preferences', profiles.updatePreferences);
 
 // GET /verification/(account_id)
 router.get('/verification/account/:id', verification.byAccountId);

@@ -1,5 +1,7 @@
 const rAPI = require("./riotAPI");
 var RiotAPI = new rAPI();
+import {isAggressivePlayer} from "../matching-service/aggressive";
+const champions = require('./static-data/champions.json')["data"];
 
 class gameAnalyzer {
     public classes: any;
@@ -8,8 +10,8 @@ class gameAnalyzer {
     public tags:any = [];
     public accountId:any;
     public gamesPlayed = 0;
-    constructor(champJSON: JSON, accountID:any) {
-        this.champions = champJSON;
+    constructor(accountID:any) {
+        this.champions = champions;
         this.accountId = accountID;
         // generate average game stats dict
         this.averageGameStats = {
@@ -32,34 +34,42 @@ class gameAnalyzer {
         }
     }
 
+    async addAllGames(games:any) {
+        var promisies:any = [];
+        for(var i in games) {
+            var game = games[i];
+            promisies.push(this.addGame(game));
+            // await asyncSleep(100);
+        }
+        await Promise.all(promisies);
+    }
+
     async addGame(game: any) {
         this.gamesPlayed += 1;
         // Get champion Tags from game
         var championId = game["champion"];
         var currentChampion;
-        for(var i in this.champions) {
-            // Get the current champion
-            if(this.champions[i]["key"] == game["champion"]) {
-                currentChampion = this.champions[i]["id"]
-                break;
-            }
-        } 
-        var gameData:any = await RiotAPI.getMatchByMatchID(game["gameId"]);
+        
+        var gameData:any = await RiotAPI.getMatchByMatchID(game["id"]);
+        gameData = gameData["profiles"];
+        // return;
         var participantId:any = 0;
-        for(var i in gameData["participants"]) {
-            if(gameData["participants"][i]["championId"] == game["champion"]) {
+        for(var i in gameData) {
+            if(gameData[i]["account_id"] == this.accountId) {
                 participantId = i;
                 break;
             }
         }
-        if(!gameData["seasonId"]) {
-            console.log("ded");
-            console.log(gameData);
-            return;
-        }
-        // console.log(gameData);
-        this.addClass(currentChampion, gameData, participantId);
+        for(var i in this.champions) {
+            // Get the current champion
+            
+            if(this.champions[i]["key"] == gameData[participantId]["data"]["champion_played"]) {
+                currentChampion = this.champions[i]["id"]
+                break;
+            }
+        } 
         this.addStats(gameData, participantId);
+        this.addClass(currentChampion, gameData, participantId);
     }
 
     addAggro(participantId:any) {
@@ -67,26 +77,29 @@ class gameAnalyzer {
     }
 
     addStats(gameData: any, participantId: any) {
-        var participantData = gameData["participants"][participantId];
+        // console.log(gameData);
+        var participantData = gameData[participantId]["data"];
         this.averageGameStats["gamesPlayed"] += 1;
 
         var ngWeight:any = (1 / this.averageGameStats["gamesPlayed"]).toFixed(2);
         var ogWeight:any = 1 - ngWeight;
         // console.log(this.averageGameStats["gameLength"]);
-        this.averageGameStats["visionScore"] = this.averageGameStats["visionScore"] * ogWeight + participantData["stats"]["visionScore"] * ngWeight;
-        this.averageGameStats["kills"] = this.averageGameStats["kills"] * ogWeight + participantData["stats"]["kills"] * ngWeight;
-        this.averageGameStats["deaths"] = this.averageGameStats["deaths"] * ogWeight + participantData["stats"]["deaths"] * ngWeight;
-        this.averageGameStats["assists"] = this.averageGameStats["assists"] * ogWeight + participantData["stats"]["assists"] * ngWeight;
-        this.averageGameStats["gameLength"] = this.averageGameStats["gameLength"] * ogWeight + gameData["gameDuration"] * ngWeight;
+        this.averageGameStats["visionScore"] = this.averageGameStats["visionScore"] * ogWeight + participantData["vision_score"] * ngWeight;
+        this.averageGameStats["kills"] = this.averageGameStats["kills"] * ogWeight + participantData["kills"] * ngWeight;
+        this.averageGameStats["deaths"] = this.averageGameStats["deaths"] * ogWeight + participantData["deaths"] * ngWeight;
+        this.averageGameStats["assists"] = this.averageGameStats["assists"] * ogWeight + participantData["assists"] * ngWeight;
+        this.averageGameStats["gameLength"] = this.averageGameStats["gameLength"] * ogWeight + participantData["duration"] * ngWeight;
         try {
-            this.averageGameStats["csDiff10"] = this.averageGameStats["csDiff10"] * ogWeight + participantData["timeline"]["csDiffPerMinDeltas"]["0-10"] * ngWeight;
+            this.averageGameStats["csDiff10"] = this.averageGameStats["csDiff10"] * ogWeight + participantData["cs_difference_0_10"] * ngWeight;
         } catch (error) {
             
         }
+        // this.averageGameStats 
     }
 
     addClass(currentChampion: string, gameData: any, participantId:any) {     
         // Get class tags for current champion
+        // console.log(currentChampion);
         var classTags = this.champions[currentChampion]["tags"];  
 
         for(var i in classTags) {
@@ -104,7 +117,7 @@ class gameAnalyzer {
             }
             // add stats
             this.classes[champClass]["gamesPlayed"] += 1;
-            if(gameData["teams"][Math.floor(participantId / 5)]["win"] == "Win") {
+            if(gameData[participantId]["data"]["win"] == true) {
                 this.classes[champClass]["wins"] += 1;
             }
             else {
@@ -112,6 +125,8 @@ class gameAnalyzer {
             }
         }
     }
+
+
 
     getClasses() {
         // Quickly generate winrate for all classes
@@ -166,6 +181,14 @@ class gameAnalyzer {
         // if(this.averageGameStats)
     }    
 
+    getMostPlayedTags() {
+
+    }
+
+    getBestTags() {
+        
+    }
+
     getTags() {
         return this.tags;
     }
@@ -173,6 +196,10 @@ class gameAnalyzer {
     getStats() {
         return this.averageGameStats;
     }
+}
+
+function getLargestKey(dict: any) {
+    return Object.keys(dict).reduce(function(a, b){ return dict[a] > dict[b] ? a : b });
 }
 
 module.exports = gameAnalyzer;

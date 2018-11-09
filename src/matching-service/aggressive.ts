@@ -60,7 +60,7 @@ const isAggressiveMatch = async (match_id: number, summonerName: string) => {
 }
 
 // Returns true if aggressive game count % is greater than 50% in a game, else false
-const isAggressivePlayer = async(accountId: number) => {
+export const isAggressivePlayer = async(accountId: number, summonerName: string) => {
     let game_count = 0
     let aggressive_game_count = 0
 
@@ -71,7 +71,7 @@ const isAggressivePlayer = async(accountId: number) => {
     });
 
     for (let match of matchJson.matches) {
-        let isAggressive = await isAggressiveMatch(match.gameId, 'Vauss')
+        let isAggressive = await isAggressiveMatch(match.gameId, summonerName)
         game_count += 1
         if (isAggressive) {
             aggressive_game_count += 1
@@ -84,6 +84,6 @@ const isAggressivePlayer = async(accountId: number) => {
     return false
 }
 
-isAggressivePlayer(51345606).then(function(res) {
-    console.log(res)
-})
+// isAggressivePlayer(51345606).then(function(res) {
+//     console.log(res)
+// })

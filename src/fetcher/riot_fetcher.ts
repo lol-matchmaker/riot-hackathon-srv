@@ -192,13 +192,20 @@ function matchProfilesFromRiotMatchJson(match_jsonObject: any, match: Match):
     try {csD10 = participant.timeline.csDiffPerMinDeltas['0-10'];} catch (error) {}
     try {csD20 = participant.timeline.csDiffPerMinDeltas['10-20'];} catch (error) {}
     try {csD30 = participant.timeline.csDiffPerMinDeltas['20-30'];} catch (error) {}
-
+    var win = match_jsonObject["teams"][Math.floor((participantId - 1) / 5)]["win"];
+    if(win == "Win") {
+        win = true;
+    }
+    else {
+        win = false;
+    }
 
     const matchProfile: MatchProfile = {
       account_id: playerInfo.currentAccountId.toString(),
       match_id: match.id,
       played_at: new Date(),  // TODO: new Date(match_jsonObject.timeCreated),
       data: {
+        win: win,
         champion_played: participant.championId, // number
         gold_earned: participant.stats.goldEarned,
         turrets_killed: participant.stats.turretsKilled,
