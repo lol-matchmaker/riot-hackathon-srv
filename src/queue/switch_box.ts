@@ -3,8 +3,21 @@ import http = require('http');
 import WebSocket = require('ws');
 
 import { WsApp } from './ws_app';
-import { QueueClientDelegate, QueueClient, QueueClientState } from './queue_client';
+import { QueueClientDelegate, QueueClient, QueueClientState, MatchPlayerData } from './queue_client';
 import { Profile } from '../db/profile';
+import { MatchedMessagePlayerRole, MatchedMessagePlayerInfo } from './ws_messages';
+
+/** Used by the match-maker to report matches to the SwitchBox. */
+export interface MatchResult {
+  [accountId: string]: MatchedMessagePlayerRole;
+}
+
+/** Set to null for the real matcher, or to number of players to get matched.
+ *
+ * The debugging matcher is a pure greedy that matches the first people who
+ * show up in the queue.
+ */
+const g_debugMatchLimit: number | null = 1;
 
 /** Manages all of the server's WebSocket clients. */
 export class SwitchBox implements WsApp, QueueClientDelegate {
@@ -94,33 +107,54 @@ export class SwitchBox implements WsApp, QueueClientDelegate {
   private handleQueueChange(client: QueueClient, added: boolean) {
     // Index the queued clients.
     const profiles: Profile[] = [];
-    const clientsByProfile = new Map<Profile, QueueClient>();
+    const clientsByAccountId = new Map<string, QueueClient>();
     for (const client of this.queued) {
       // "as Profile" is safe because all the clients in the queue must have
       // been authenticated.
       const profile = client.profile() as Profile;
       profiles.push(profile);
-      clientsByProfile.set(profile, client);
+      clientsByAccountId.set(profile.account_id, client);
     }
 
     // Try to find a match.
-    let match: Profile[] | null = null;
-    if (profiles.length >= 1) {
-      match = [profiles[0]];
+    let matchResult: MatchResult | null = null;
+    if (g_debugMatchLimit === null) {
+      // Real matcher goes here. Takes profiles and returns MatchResult.
+    } else {
+      // Debugging matcher that takes the first players who show up.
+      if (profiles.length >= g_debugMatchLimit) {
+        matchResult = {};
+        matchResult[profiles[0].account_id] = 'MID';
+      }
     }
 
     // Make the match happen.
-    if (!match) {
+    if (!matchResult) {
       return;
     }
-    for (const matchedProfile of match) {
+    const matchClients: QueueClient[] = [];
+    const matchData: MatchPlayerData[] = [];
+    for (const accountId in matchResult) {
+      if (!matchResult.hasOwnProperty(accountId)) {
+        continue;
+      }
+      const role = matchResult[accountId];
+
       // "as QueueClient" is safe here because clientsByProfile contains all
       // Profile instances in profiles, and match is a subset of profiles.
-      const matchedClient = clientsByProfile.get(matchedProfile) as QueueClient;
+      const matchedClient = clientsByAccountId.get(accountId) as QueueClient;
+      matchClients.push(matchedClient);
+
+      // "as Profile" is safe here because matchClients is a subset of the
+      // queued clients, all of which have been authenticated.
+      const profile = matchedClient.profile() as Profile;
+      matchData.push({ profile, role });
+    }
+
+    for (const matchedClient of matchClients) {
       this.queued.delete(matchedClient);
       this.matched.add(matchedClient);
-
-      matchedClient.wasMatched(match);
+      matchedClient.wasMatched(matchData);
     }
   }
 }
