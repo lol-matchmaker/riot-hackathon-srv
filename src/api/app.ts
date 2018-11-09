@@ -31,9 +31,7 @@ router.get('/profiles/:id', profiles.byAccountId);
 // GET /profile_by_name/(summoner_name)
 router.get('/profile_by_name/:name', profiles.byName);
 // POST /profiles/update
-router.post('/profiles/update', function() {
-
-})
+router.post('/profiles/update', profiles.updateCompatibility);
 
 // GET /verification/(account_id)
 router.get('/verification/account/:id', verification.byAccountId);

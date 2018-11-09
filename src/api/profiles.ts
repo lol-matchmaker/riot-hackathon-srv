@@ -20,12 +20,12 @@ const profile = {
     const profile = await findProfileByAccountId(accountId);
     ctx.response.body = profile;
   },
-  updatePlayerCompatibility: async (ctx: Koa.Context, next: () => Promise<any>) => {
+  updateCompatibility: async (ctx: Koa.Context, next: () => Promise<any>) => {
     await next();
 
-    console.log(ctx.request.)
-    // const profile = await updatePlayerCompatibility(ctx.response.body); // can't get ctx body
-    // ctx.response.body = profile;
+    const name = ctx.params.name
+    const profile = await updatePlayerCompatibility(ctx.request.body, name);
+    ctx.response.body = profile;
   },
 };
 

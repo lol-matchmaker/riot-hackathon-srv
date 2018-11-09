@@ -101,13 +101,19 @@ export async function readProfilesPaged(pageStart: string, pageSize: number):
   return { data: data, nextPageStart: nextPageStart };
 }
 
-export async function updatePlayerCompatibility(update_info: any) {
-  ProfileModel.update(
-    {
-      stats: update_info
-    },
-    { where: {
-        summoner_name: 'OXStormthunder'
-      }
-  })
+export async function updatePlayerCompatibility(update_info: any, name: string) {
+  await ProfileModel.findOne({
+    where: {
+       summoner_name: name
+    }
+ }).then(function(res) {
+    ProfileModel.update(
+      {
+        stats: Object.assign(res, update_info)
+      },
+      { where: {
+          summoner_name: name
+        }
+    })
+ });
 }
