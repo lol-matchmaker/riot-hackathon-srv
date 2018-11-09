@@ -124,7 +124,7 @@ export class SwitchBox implements WsApp, QueueClientDelegate {
       // Debugging matcher that takes the first players who show up.
       if (profiles.length >= g_debugMatchLimit) {
         matchResult = {};
-        matchResult[profiles[0].account_id] = 'MID';
+        matchResult[profiles[0].account_id] = 'MIDDLE';
       }
     }
 

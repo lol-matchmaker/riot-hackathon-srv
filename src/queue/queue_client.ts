@@ -94,6 +94,7 @@ export class QueueClient {
       message.players.push({
         account_id: player.profile.account_id,
         summoner_id: player.profile.summoner_id,
+        summoner_name: player.profile.summoner_name,
         role: player.role,
       });
     }
