@@ -1,8 +1,8 @@
 {
   "name": "riot-hackathon-srv",
-  "description": "lulz no description",
+  "description": "Matchmaking service for League of Legends",
   "private": true,
-  "license": "UNLICENSED",
+  "license": "MIT",
   "dependencies": {
     "@koa/cors": "^2.2.2",
     "koa": "^2.6.1",
